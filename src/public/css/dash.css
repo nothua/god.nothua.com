@@ -1,0 +1,100 @@
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap");
+body {
+  font-family: "Noto Sans", sans-serif;
+  display: flex;
+  flex-direction: column;
+  background-color: #292929;
+  
+}
+
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizelegibility;
+  letter-spacing: -0.25px;
+}
+
+.alternating-colors {
+  padding-left: 50px;
+}
+
+.alternating-colors li {
+  color: #d3d3d3;
+  padding-left: 16px;
+  margin-top: 8px;
+  position: relative;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.alternating-colors li p {
+  margin-top: 4px;
+}
+
+.alternating-colors li strong {
+  color: #ffffff;
+}
+
+.alternating-colors li a {
+  text-decoration: none;
+  transition: border-color 0.2s;
+  color: #ffffff;
+}
+
+.preloader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100%;
+  background: rgb(23, 22, 22);
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  transition: opacity 0.5s ease-out;
+}
+
+.page-content {
+  display: none;
+  opacity: 0;
+  transition: opacity 0.5s ease-out;
+}
+
+.context-menu {
+  display: none;
+  position: absolute;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  padding: 10px;
+  border-radius: 5px;
+  width: 150px;
+  font-size: 11px;
+  color: #292929;
+}
+
+.context-menu ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.context-menu li {
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.context-menu li a {
+  color: #292929;
+  text-decoration: none;
+}
+
+.context-menu li:hover {
+  background-color: #f0f0f0;
+}
+
+.ql-editor {
+  color: black;
+}

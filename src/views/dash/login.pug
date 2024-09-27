@@ -1,0 +1,38 @@
+doctype html
+html(lang="en")
+    head
+        meta(charset="UTF-8")
+        meta(name="viewport", content="width=device-width, initial-scale=1.0")
+        title Login - Mod Utilities
+    body(class="bg-gray-200 dark:bg-gray-900")
+        .container.mx-auto.p-4(class="absolute")
+            button#theme-toggle.px-4.py-2.text-gray-700(class="dark:text-white hover:scale-105 focus:outline-none").transition-colors.duration-300.transform.absolute.top-4.right-4
+                i.fa-solid.fa-moon.hidden(class="dark:block pe-0.5").pt-1
+                i.fa-solid.fa-sun(class="dark:hidden")
+        main.flex.items-center.justify-center.h-screen
+            .w-full.max-w-sm.mx-auto.overflow-hidden.bg-white.shadow-md(class="dark:bg-gray-800")
+                .px-6.py-4
+                    h3.mt-3.text-xl.font-medium.text-center.text-gray-600(class="dark:text-gray-200") Login
+                    p.mt-1.text-center.text-gray-500(class="dark:text-gray-400") Sign in to your account
+                    if error != null
+                        .mt-5.mx-0.px-4.border-l-1.border-red-500.bg-red-50(class="md:max-w-2xl md:x-auto")
+                            .flex.justify-between.py-3
+                                .flex
+                                    i.fas.fa-exclamation-triangle.text-red-500.mt-1
+                                    .self-center.ml-3
+                                        .text-red-600= error
+
+                    form.mt-6(method="post", action="/login")
+                        div
+                            label(for="username" class="dark:text-gray-400").block.text-sm.text-gray-800 Username
+                            input.block.w-full.px-4.py-2.mt-2.text-gray-700.placeholder-gray-500.bg-white.border.rounded-lg(class="dark:bg-gray-800 dark:border-gray-600 dark:placeholder-gray-400 focus:border-blue-400 dark:focus:border-blue-300 dark:text-white focus:ring-opacity-40 focus:outline-none focus:ring focus:ring-blue-300" type="name" placeholder="Username" aria-label="Username" name="username").rounded-sm
+
+                        div.mt-4
+                            label(for="password" class="dark:text-gray-400").block.text-sm.text-gray-800 Password
+                            input.block.w-full.px-4.py-2.mt-2.text-gray-700.placeholder-gray-500.bg-white.border.rounded-lg(class="dark:bg-gray-800 dark:border-gray-600 dark:placeholder-gray-400 focus:border-blue-400 dark:focus:border-blue-300 dark:text-white focus:ring-opacity-40 focus:outline-none focus:ring focus:ring-blue-300" type="password" placeholder="Password" aria-label="Password" name="password").rounded-sm
+                        .flex.items-center.justify-between.mt-6.mb-2
+                            button.px-6.py-2.text-sm.font-medium.tracking-wide.text-white.capitalize.transition-colors.duration-300.transform.bg-blue-500.rounded-lg(class="hover:bg-blue-400 focus:outline-none focus:ring focus-ring-blue-300 focus:ring-opacity-50").w-full.rounded-none Sign In
+
+        link(rel='stylesheet' href='/lib/fontawesome/css/all.min.css')
+        link(rel="stylesheet", href="/css/tailwind.css")
+        script(src="/js/toggle-theme.js", defer)

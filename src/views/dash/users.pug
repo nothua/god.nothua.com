@@ -1,0 +1,281 @@
+extends _layout
+
+block content
+    section.container.mx-auto(x-data="userList")
+        div(class="sm:flex sm:items-center sm:justify-between")
+            div
+                .flex.items-center.gap-x-3
+                    h2.text-lg.font-medium.text-gray-800(class="dark:text-white") Users
+                    span.px-3.py-1.text-xs.text-blue-600.bg-blue-100.rounded-full(class="dark:bg-gray-800 dark:text-blue-400")#users-count 10 users
+            .flex.items-center.mt-4.gap-x-3
+                button.flex.items-center.justify-center.px-5.py-2.text-sm.tracking-wide.text-white.transition-colors.duration-200.bg-blue-500.rounded-lg.shrink-0.gap-x-2(class="w-1/2 sm:w-auto hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500" @click="isOpen = true" ).add-user
+                    i.fas.fa-add
+                    span Add user
+        .mt-6(class="md:flex md:items-center md:justify-between")
+            .inline-flex.overflow-hidden.bg-white.border.divide-x.rounded-lg(class="dark:bg-gray-900 rtl:flex-row-reverse dark:border-gray-700 dark:divide-gray-700")#filter-buttons
+                template(x-for="(item, index) in filterButtons" :key="index")
+                    button(:class="getClassNames(item.query === roleFilt er)" @click="roleFilter = item.query; searchUsers()" x-text="item.title")
+            .relative.flex-items-center.mt-4(class="md:mt-0")
+                span.absolute
+                    i.fas.fa-search.w-5.h-5.mx-3.text-gray-400(class="dark:text-gray-600 mt-2.5")
+                input.block.w-full.pr-5.text-gray-700.bg-white.border.border-gray-200.rounded-lg(class="py-1.5 md:w-80 placeholder-gray-400/70 pl-11 rtl:pr-11 rtl:pl-5 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-600 focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40" placeholder="Search" type="text" x-model="searchQuery" @input="searchUsers")
+
+        .hidden.flex.items-center.mt-6.text-center.border.rounded-lg.h-96(class="dark:border-gray-700")#no-users
+            .flex.flex-col.w-full.max-w.sm.px-4.mx-auto
+                .p-3.mx-auto.text-blue-500.bg-blue-100.rounded-full(class="dark:bg-gray-800")
+                    i.w-6.h-6.fas.fa-search
+                h1.mt-3.text-lg.text-gray-800(class="dark:text-white") No users
+                p.mt-2.text-gray-500(class="dark:text-gray-400") Your search did not match any user. Try again or create a new one
+                .flex.items-center.mt-4(class="sm:mx-auto gap-x-3")
+                    button.px-5.py-2.text-sm.text-gray-700.transition-colors.duration-200.bg-white.border.rounded-lg(class="w-1/2 sm:w-auto dark:hover:bg-gray-800 dark:bg-gray-900 hover:bg-gray-100 dark:text-gray-200 dark:border-gray-700" @click="clearSearch")
+                        | Clear Search
+
+                    button.flex.items-center.justify-center.py-2.px-4.text-sm.tracking-wide.text-white.transition-colors.duration-200.bg-blue-500.rounded-lg.shrink-0(class="w-1/2 sm:w-auto gap-x-2 hover:bg-blue-600 dark:hover:bg-blue-500 dark:bg-blue-600" @click="isOpen = true" ).add-user
+                        i.fas.fa-add
+                        span Add User
+        .flex.flex-col.mt-6#users-table-layout
+            .overflow-x-auto(class="-my-2 md:-mx-6 lg:-mx-8")
+                .inline-block.min-w-full.py-2.align-middle(class="md:px-6 lg:px-8")
+                    .overflow-hidden.border.border-gray-200(class="dark:border-gray-700 md:rounded-lg")
+                        table.min-w-full.divide-y.divide-gray-200(class="dark:divide-gray-700")#users-table
+                            thead.bg-gray-50(class="dark:bg-gray-800")
+                                tr
+                                    th(class="py-3.5 rtl:text-right dark:text-gray-400" scope="col").px-4.text-sm.font-small.text-left.text-gray-500
+                                        span Username
+                                    th(class="rtl:text-right dark:text-gray-400 py-3.5" scope="col").px-12.text-sm.font-small.text-left.text-gray-500
+                                        span Name
+                                    th(class="rtl:text-right dark:text-gray-400 py-3.5" scope="col").px-12.text-sm.font-small.text-center.text-gray-500
+                                        span Role
+                                    th(class="rtl:text-right dark:text-gray-400 py-3.5" scope="col").px-12.text-sm.font-small.text-start.text-gray-500
+                                        span Actions
+                            tbody.bg-white.divide-y.divide-gray-200(class="dark:divide-gray-700 dark:bg-gray-900")
+                                template(x-for="user in filteredUsers" :key="user.id")
+                                    tr
+                                        td.px-4.py-4.text-sm.font-medium.whitespace-nowrap.text-gray-800(class="dark:text-white" x-text="user.username")
+                                        td.px-12.py-4.text-sm.font-medium.whitespace-nowrap.text-gray-800(class="dark:text-white" x-text="user.name")
+                                        td.px-12.py-4
+                                            .px-3.py-1.bg-green-600.whitespace-nowrap.w-fit.text-xs.rounded-full.uppercase.text-white.mx-auto
+                                                b(x-text="user.role")
+                                        td.px-12.py-4.text-sm.whitespace-nowrap
+                                            .flex.tems.center.gap-x-6
+                                                button.text-gray-500.transition-colors.duration-200(class="dark:hover:text-red-500 dark:text-gray-300 hover:text-red-500 focus:outline-none" @click="toggleAccess(user.revoked, user.id)" x-text="!user.revoked ? 'Revoke' : 'Activate'").w-12.text-center
+                                                button.text-gray-500.transition-colors.duration-200(class="dark:hover:text-red-500 dark:text-gray-300 hover:text-red-500 focus:outline-none" @click="deleteUser(user.id)").w-12.text-center Delete
+
+
+        #modal(x-show="isOpen")
+            .fixed.inset-0.z-20.transition-opacity.bg-black.opacity-30
+            .fixed.inset-0.z-40.overflow-y-auto(x-show="isOpen" x-transition:enter="transition duration-300 ease-out" x-transition:enter-start="translate-y-4 opacity-0 sm:translate-y-0 sm:scale-95" x-transition:enter-end="translate-y-0 opacity-100 sm:scale-100" x-transition:leave="transition duration-150 ease-in" x-transition:leave-start="translate-y-0 opacity-100 sm:scale-100" x-transition:leave-end="translate-y-4 opacity-0 sm:translate-y-0 sm:scale-95" aria-lebelledby="user-model-title" role="dialog" aria-modal="true")
+                .flex.items-end.justify-center.min-h-screen.px-4.pt-4.pb-20.text-center(class="sm:block sm:p-0")
+                    span.hidden(class="sm:inline-block sm:h-screen sm:align-middle" aria-hidden="true") &#8203;
+                    .relative.inline-block.px-4.pt-5.pb-4.overflow-hidden.text-left.align-bottom.transition-all.transform.bg-white.rounded-lg.shadow-xl(class="dark:bg-gray-900 sm:my-8 sm:w-full sm:max-w-sm sm:p-6 sm:align-middle")
+                        h3.text-lg.font-medium.leading-6.text-gray-800.capitalize(class="dark:text-white" id="modal-title")
+                            | Add User
+                        span.absolute.top-0.right-0.pr-4(class="pt-4")
+                            button.px-2.py-1.text-gray-400(class="dark:text-gray-300 hover:text-gray-500 focus:outline-none" @click="isOpen = false; create_name = ''; create_username = ''; create_role = ''; create_password = ''" ).transition-colors.duration-200#close-modal
+                                i.fas.fa-times
+                        form.mt-4(x-on:submit.prevent="createUser")
+                            label.text-sm.text-gray-700(class="dark:text-gray-200") Name
+                            label.block.mt-3.mb-3
+                                input.block.w-full.px-4.py-3.text-sm.text-gray-700.bg-white.border.border-gray-200.rounded-md(class="focus:ring-opacity-40 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue 300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:dark-blue-300" type="name" name="create_name" placeholder="Name" aria-label="Name" x-model="create_name")
+                            label.text-sm.text-gray-700(class="dark:text-gray-200") Username
+                            label.block.mt-3.mb-3
+                                input.block.w-full.px-4.py-3.text-sm.text-gray-700.bg-white.border.border-gray-200.rounded-md(class="focus:ring-opacity-40 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue 300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:dark-blue-300" type="name" name="create_username" placeholder="Username" aria-label="Username" x-model="create_username")
+                            label.text-sm.text-gray-700(class="dark:text-gray-200") Password
+                            label.block.mt-3.mb-3
+                                input.block.w-full.px-4.py-3.text-sm.text-gray-700.bg-white.border.border-gray-200.rounded-md(class="focus:ring-opacity-40 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue 300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:dark-blue-300" type="password" name="create_password" placeholder="Password" aria-label="Password" x-model="create_password")
+                            label.text-sm.text-gray-700(class="dark:text-gray-200") Role
+                            label.block.mt-3.mb-3
+                                select.block.w-full.px-4.py-3.text-sm.text-gray-700.bg-white.border.border-gray-200.rounded-md(class="focus:ring-opacity-40 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue 300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:dark-blue-300" name="create_role" aria-label="Role" x-model="create_role")
+                                    option(value="" default hidden) Select role
+                                    option(value="admin") Admin
+                                    option(value="moderator") Moderator
+
+                            button.px-6.py-2.font-medium.tracking-wide.text-white.capitalize.transition-colors.duration-300.transform.bg-blue-600.rounded-lg(class="hover:bg-blue-500 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-80 w-full mt-4")
+                                | Add User
+
+
+block scripts
+    script.
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('userList', () => ({
+                users: [],
+                filteredUsers: [],
+                searchQuery: "",
+                isOpen: false,
+                roleFilter: "all",
+                create_name: "",
+                create_username: "",
+                create_password: "",
+                create_role: "User",
+                init(){
+                    this.loadUsers()
+                },
+                async loadUsers(){
+                    const preloader = document.getElementById("preloader")
+                    preloader.classList.remove("hidden")
+
+                    try{
+                        const response = await axios.get("/users/list", {})
+                        this.users = response.data
+                    }catch (error){
+                        this.users = []
+                    }
+
+                    this.filteredUsers = this.users
+
+                    preloader.classList.add("hidden")
+
+                    this.renderUsers()
+
+                },
+
+                async searchUsers(){
+
+                    this.filteredUsers = this.users.filter(user => {
+
+                        const roleFilter = () => {
+                            if(this.roleFilter == "all") return user.role.toLowerCase()
+                            return this.roleFilter
+                        }
+
+                        const searchFilter = () => {
+                            if(this.searchQuery)
+                                return user.name.toLowerCase().includes((this.searchQuery.toLowerCase()) || user.username.toLowerCase().includes(this.searchQuery.toLowerCase()))
+                            return true
+                        }
+
+                        return searchFilter() && user.role.toLowerCase() == roleFilter()
+                    })
+
+                    this.renderUsers()
+                },
+
+                async createUser(){
+                    const preloader = document.getElementById("preloader")
+                    preloader.classList.remove("hidden")
+
+                    try{
+                        const response = await axios.post("/users/create", {
+                            name: this.create_name,
+                            username: this.create_username,
+                            password: this.create_password,
+                            role: this.create_role
+                        })
+
+                        this.create_name = ""
+                        this.create_username = ""
+                        this.create_password = ""
+                        this.create_role = "User"
+                        this.isOpen = false
+
+                        if(response.data.success)
+                            showAlert("success", response.data.message)
+                        else
+                            showAlert("error", response.data.message)
+                    } catch (error){
+                        console.log(error)
+                        showAlert("error", "Something happened. Please try again")
+                    }
+
+                    await this.loadUsers()
+                },
+
+                renderUsers(){
+                    if(this.filteredUsers.length > 0){
+                        document.getElementById("users-table-layout").classList.remove("hidden")
+                        document.getElementById("no-users").classList.add("hidden")
+                    }else{
+                        document.getElementById("users-table-layout").classList.add("hidden")
+                        document.getElementById("no-users").classList.remove("hidden")
+                    }
+
+                    document.getElementById("users-count").innerHTML = this.filteredUsers.length + (this.filteredUsers.length == 1 ? " user" : " users")
+                },
+
+                clearSearch() {
+                    this.searchQuery = '';
+                    this.filteredUsers = this.users;
+                    this.renderUsers()
+                },
+
+                async deleteUser(id){
+                    showModal("Are you sure you want to delete?", "Deleting the user will delete all the data associated with it.", "Delete", async () => {
+                        const preloader = document.getElementById("preloader")
+                        preloader.classList.remove("hidden")
+
+                        try{
+                            const response = await axios.delete(`/users/delete/${id}`)
+
+                            if(response.data.success)
+                                showAlert("success", response.data.message)
+                            else
+                                showAlert("error", response.data.message)
+                        }catch (error){
+                            console.log(error.message)
+                            showAlert("error", "Something happened. Please try again")
+                        }
+
+                        await this.loadUsers()
+                    })
+                },
+
+                async toggleAccess(revoked, id){
+                    const title = !revoked ? "Are you sure you want to revoke access?" : "Are you sure you want to grant access?"
+                    const description = !revoked ? "Revoking access will prevent the user from accessing the system." : "Granting access will allow the user to access the system."
+                    const confirmName = !revoked ? "Revoke Access" : "Grant Access"
+
+                    showModal(title, description, confirmName, async () => {
+                        const preloader = document.getElementById("preloader")
+                        preloader.classList.remove("hidden")
+
+                        try{
+                            const response = await axios.get(`/users/access/${id}`)
+
+                            if(response.data.success)
+                                showAlert("success", response.data.message)
+                            else
+                                showAlert("error", response.data.message)
+                        }catch (error){
+                            console.log(error)
+                            showAlert("error", "Something happened. Please try again")
+                        }
+
+                        await this.loadUsers()
+                    })
+                },
+
+                filterButtons: [
+                    {
+                        title: "View All",
+                        query: "all",
+                        type: "role"
+                    },
+                    {
+                        title: "Admin",
+                        query: "admin",
+                        type: "role"
+                    },
+                    {
+                        title: "Moderator",
+                        query: "moderator",
+                        type: "role"
+                    }
+                ],
+                classes: {
+                    filter_button : [
+                        "px-5","py-2","text-xs", "font-medium", "transition-colors", "dark:text-gray-300", "text-gray-600", "duration-200", "sm:text-sm",
+                    ],
+                    active_button: [
+                        "dark:bg-gray-800", "dark:text-gray-300", "bg-gray-100"
+                    ],
+                    inactive_button: [
+                        "hover:bg-gray-100", "dark:bg-gray-700",
+                    ]
+                },
+                getClassNames(isActive) {
+                    const baseClasses = this.classes.filter_button.join(' ');
+                    const stateClasses = isActive ? this.classes.active_button : this.classes.inactive_button;
+                    return `${baseClasses} ${stateClasses.join(' ')}`;
+                },
+            }))
+        })

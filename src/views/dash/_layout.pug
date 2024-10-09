@@ -4,7 +4,7 @@ html(lang="en")
         meta(charset="UTF-8")
         meta(name="viewport", content="width=device-width, initial-scale=1.0")
         title= title
-    body
+    body(class="bg-gray-100 dark:bg-gray-800")
         .relative.min-h-screen(class="lg:flex")
             header.text-gray-100.bg-gray-800(class="lg:hidden")
                 .container.flex.items-center.justify-between.px-4.py-2.mx-auto
@@ -12,10 +12,10 @@ html(lang="en")
                     button.p-2.text-white.rounded-lg(class="focus:outline-none hover:bg-gray-700")#mobile-menu-toggle
                         i.fa-solid.fa-bars
             .hidden.fixed.inset-0.z-10.transition-opacity.bg-black.opacity-30(class="lg:hidden")#mobile-menu-overlay
-            aside.flex.flex-col.items-center.w-16.h-screen.py-8.overflow-y-auto.bg-white(class='-translate-x-full ease-out fixed inset-y-0 left-0 z-20 flex flex-col w-[4.5rem] min-h-screen space-y-6 overflow-y-auto text-gray-100 transition duration-200 transform bg-gray-200 dark:bg-gray-700 lg:translate-x-0 lg:relative lg:inset-0')#sidebar
+            aside.flex.flex-col.items-center.w-16.h-screen.py-8.overflow-y-auto.bg-white(class='-translate-x-full ease-out fixed inset-y-0 left-0 z-20 flex-col w-[4.5rem] min-h-screen space-y-6 overflow-y-auto text-gray-100 transition duration-200 transform bg-gray-200 dark:bg-gray-700 lg:translate-x-0 lg:sticky lg:inset-0')#sidebar
                 nav.flex.flex-col.flex-1.space-y-6
                     each route in routes
-                        a.text-gray-700.transition-colors.duration-200.rounded-lg.items-center.justify-center.flex(href=`${route.route}` class=`p-2.5 focus:outline-nones dark:text-gray-200 dark:hover:bg-gray-800 hover:bg-gray-100 ${active === route.name.toLowerCase() ? 'bg-gray-100 dark:bg-gray-800' : ''}`)
+                        a.text-gray-700.transition-colors.duration-200.rounded-lg.items-center.justify-center.flex(href=`${route.route}` class=`p-2.5 focus:outline-nones dark:text-gray-200 dark:hover:bg-gray-800 hover:bg-gray-100 ${active.toLowerCase() === route.name.toLowerCase() ? 'bg-gray-100 dark:bg-gray-800' : ''}`)
                             i.fa-solid(class=`-me-0.5 fa-${route.icon}`)
                 .flex.flex-col.space-y-6
                     a.text-gray-700.transition-colors.duration-200.rounded-lg.items-center.justify-center.flex(href='#' class='p-2.5 focus:outline-nones dark:text-gray-200 dark:hover:bg-gray-800 hover:bg-gray-100')#theme-toggle
@@ -23,7 +23,7 @@ html(lang="en")
                         i.fa-regular.fa-sun(class="dark:hidden -me-0.5")
                     a.text-gray-700.transition-colors.duration-200.rounded-lg(href='/logout' class='p-2.5 focus:outline-nones dark:text-gray-200')
                         i.fa-solid.fa-sign-out(class="-me-0.5")
-            main.bg-gray-100(class="dark:bg-gray-800 md:space-y-8").flex-1.p-8.space-y-6.overflow-y-auto.bg-gray-100.h-screen
+            main(class="md:space-y-8 h-full bg-gray-100 dark:bg-gray-800").flex-1.p-8.space-y-6.overflow-y-auto.bg-gray-100
                 block content
                 .px-4.rounded-md.border-l-4.border-green-500.bg-green-50(class="md:max-w-2xl md:mx-auto").bottom-5.fixed.right-5.left-5.hidden#success-alert.z-50
                     .flex.justify-between.py-3
@@ -72,6 +72,7 @@ html(lang="en")
         script(src="/js/toggle-theme.js", defer)
         script(src="/js/script.js", defer)
         script(src="/js/axios.js", defer)
+        script(src="/js/alpine.collapse.js", defer)
         script(src="/js/alpine.js", defer)
         script(src="/js/clipboard.js", defer)
         block scripts

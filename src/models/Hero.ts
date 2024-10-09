@@ -1,5 +1,4 @@
 import { Document, Schema, model } from "mongoose";
-import { split } from "postcss/lib/list";
 
 export enum Resource {
       "Mana" = "mana",
@@ -74,6 +73,7 @@ const schema = new Schema({
                   banner: { type: String },
                   thumbnail: { type: String },
                   default: { type: Boolean },
+                  tag: { type: String },
             },
       ],
       role: {
@@ -184,83 +184,64 @@ const schema = new Schema({
             hp: {
                   base: { type: Number, required: true, default: 0 },
                   growth: { type: Number, required: true, default: 0 },
-                  percentage: { type: Number, default: 0 },
             },
             resource: {
                   base: { type: Number, required: true, default: 0 },
                   growth: { type: Number, required: true, default: 0 },
-                  percentage: { type: Number, default: 0 },
             },
             hpRegen: {
                   base: { type: Number, required: true, default: 0 },
                   growth: { type: Number, required: true, default: 0 },
-                  percentage: { type: Number, default: 0 },
             },
             resourceRegen: {
                   base: { type: Number, required: true, default: 0 },
                   growth: { type: Number, required: true, default: 0 },
-                  percentage: { type: Number, default: 0 },
             },
             physicalAttack: {
                   base: { type: Number, required: true, default: 0 },
                   growth: { type: Number, required: true, default: 0 },
-                  percentage: { type: Number, default: 0 },
             },
             magicPower: {
                   base: { type: Number, required: true, default: 0 },
                   growth: { type: Number, required: true, default: 0 },
-                  percentage: { type: Number, default: 0 },
             },
             physicalDefense: {
                   base: { type: Number, required: true, default: 0 },
                   growth: { type: Number, required: true, default: 0 },
-                  percentage: { type: Number, default: 0 },
             },
             magicDefense: {
                   base: { type: Number, required: true, default: 0 },
                   growth: { type: Number, required: true, default: 0 },
-                  percentage: { type: Number, default: 0 },
             },
             attackSpeed: {
                   base: { type: Number, required: true, default: 0 },
                   growth: { type: Number, required: true, default: 0 },
-                  percentage: { type: Number, default: 0 },
             },
             attackSpeedRatio: {
                   percentage: { type: Number, default: 0 },
             },
             movementSpeed: {
                   base: { type: Number, required: true, default: 0 },
-                  growth: { type: Number, required: true, default: 0 },
-                  percentage: { type: Number, default: 0 },
             },
             cooldownReduction: {
-                  base: { type: Number, required: true, default: 0 },
-                  growth: { type: Number, required: true, default: 0 },
                   percentage: { type: Number, default: 0 },
             },
             criticalChance: {
-                  base: { type: Number, required: true, default: 0 },
-                  growth: { type: Number, required: true, default: 0 },
                   percentage: { type: Number, default: 0 },
             },
             criticalDamage: {
-                  base: { type: Number, required: true, default: 0 },
-                  growth: { type: Number, required: true, default: 0 },
+                  percentage: { type: Number, default: 0 },
+            },
+            criticalDamageReduction: {
                   percentage: { type: Number, default: 0 },
             },
             lifesteal: {
-                  base: { type: Number, required: true, default: 0 },
-                  growth: { type: Number, required: true, default: 0 },
                   percentage: { type: Number, default: 0 },
             },
             spellVamp: {
-                  base: { type: Number, required: true, default: 0 },
-                  growth: { type: Number, required: true, default: 0 },
                   percentage: { type: Number, default: 0 },
             },
             resilience: {
-                  base: { type: Number, required: true, default: 0 },
                   percentage: { type: Number, default: 0 },
             },
             damageReduction: {
@@ -268,15 +249,24 @@ const schema = new Schema({
                   percentage: { type: Number, default: 0 },
             },
             healingEffect: {
-                  base: { type: Number, required: true, default: 0 },
                   percentage: { type: Number, default: 0 },
             },
             healingReceived: {
-                  base: { type: Number, required: true, default: 0 },
                   percentage: { type: Number, default: 0 },
             },
             basicAttackRange: {
-                  base: { type: Number, required: true, default: 0 },
+                  baseName: {
+                        type: String,
+                        required: true,
+                        default: "Default",
+                  },
+                  base: { type: String, required: true, default: 0 },
+                  alternateName: {
+                        type: String,
+                        required: true,
+                        default: "Alternate",
+                  },
+                  alternate: { type: String, required: true, default: 0 },
             },
       },
       ratings: {

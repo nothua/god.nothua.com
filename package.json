@@ -9,7 +9,8 @@
             "dev": "bun --hot run src/index.ts"
       },
       "devDependencies": {
-            "@types/bun": "latest"
+            "@types/bun": "latest",
+            "daisyui": "^4.12.10"
       },
       "peerDependencies": {
             "typescript": "^5.0.0"
@@ -26,6 +27,7 @@
             "mongodb": "^5.2.0",
             "mongoose": "^8.6.3",
             "mysql": "^2.18.1",
+            "octokit": "^4.0.2",
             "postcss": "^8.4.44",
             "postcss-cli": "^11.0.0",
             "pug": "^3.0.3",

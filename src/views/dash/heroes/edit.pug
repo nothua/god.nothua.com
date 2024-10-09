@@ -1,0 +1,331 @@
+extends ../_layout
+
+block content
+      section.container.mx-auto(x-data="heroData")
+            div(class="sm:flex sm:items-center sm:justify-between")
+                  div
+                        .flex.items-center.gap-x-3
+                              h2.text-lg.font-medium.text-gray-800(class="dark:text-white")
+
+            div.grid.gap-4.grid-cols-1.mt-6(class="lg:grid-cols-4 md:grid-cols-2")
+                  div 
+                        .flex.items-center.space-x-6.mt-4
+                              .shrink-0
+                                    img(:src=`hero.thumbnail`, class="w-16 h-16 object-cover rounded-lg" id="thumbnail")
+                              label.block 
+                                    span.sr-only Image
+                                    input.block.w-full.text-sm.text-slate-500(type="file" accept="image/*" class="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100" onchange="loadThumbnail(event)")#thumbnailInput
+
+                  div 
+                        p.text-md.text-gray-800(class="dark:text-white") Primary Role
+                        select.block.w-full.px-4.py-3.appearance-none.text-sm.text-gray-700.bg-white.border.border-gray-200.rounded-md.mt-1(class="focus:ring-opacity-40 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue 300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:dark-blue-300" aria-label="Role" x-model="hero.role.primary").capitalize
+                              option(hidden value="") Select a Role
+                              template(x-for="role in roles")
+                                    option(:value="role" x-text="role").capitalize 
+                  div   
+                        p.text-md.text-gray-800(class="dark:text-white") Secondary Role
+                        select.block.w-full.px-4.py-3.appearance-none.text-sm.text-gray-700.bg-white.border.border-gray-200.rounded-md.mt-1(class="focus:ring-opacity-40 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue 300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:dark-blue-300" aria-label="Role" x-model="hero.role.secondary").capitalize
+                              option(hidden value="") Select a Role
+                              template(x-for="role in roles")
+                                    option(:value="role" x-text="role").capitalize 
+                  div
+                        p.text-md.text-gray-800(class="dark:text-white") Resource
+                        select.block.w-full.px-4.py-3.appearance-none.text-sm.text-gray-700.bg-white.border.border-gray-200.rounded-md.mt-1(class="focus:ring-opacity-40 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue 300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:dark-blue-300" aria-label="Role" x-model="hero.resource").capitalize
+                              option(hidden value="") Select a Resource
+                              template(x-for="resource in resources")
+                                    option(:value="resource" x-text="resource").capitalize 
+                  .col-span-1(class="lg:col-span-4 md:col-span-2")
+                        p.text-md.text-gray-800(class="dark:text-white") Story
+                        textarea.block.w-full.px-4.py-3.appearance-none.text-sm.text-gray-700.bg-white.border.border-gray-200.rounded-md.mt-1(class="focus:ring-opacity-40 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue 300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:dark-blue-300" aria-label="Story" x-model="hero.story")
+
+            div.w-full.mt-4(x-data="{openTab: 0, activeClasses:'text-gray-200 bg-blue-700', inactivClasses:'dark:text-gray-200 text-gray-900'}" class="dark:border-gray-900").border.border-gray-200.rounded-md
+                  .flex.flex-col.flex-warp.rounded-none(class="sm:flex-row dark:bg-gray-900").bg-gray-200.p-2.gap-2.shadow-md
+                        a.px-6.py-2.text-base.font-medium.rounded-md.shadow-md.select-none(href="javascript:void(0)" @click="openTab=0" :class="openTab === 0 ? activeClasses : inactivClasses") Ratings
+                        a.px-6.py-2.text-base.font-medium.rounded-md.shadow-md.select-none(href="javascript:void(0)" @click="openTab=1" :class="openTab === 1 ? activeClasses : inactivClasses") Skills
+                        a.px-6.py-2.text-base.font-medium.rounded-md.shadow-md.select-none(href="javascript:void(0)" @click="openTab=2" :class="openTab === 2 ? activeClasses : inactivClasses") Skins
+                        a.px-6.py-2.text-base.font-medium.rounded-md.shadow-md.select-none(href="javascript:void(0)" @click="openTab=3" :class="openTab === 3 ? activeClasses : inactivClasses") Attributes 
+                  div
+                        .grid.gap-4.grid-cols-1(class="lg:grid-cols-4 md:grid-cols-2" x-show="openTab === 0").p-4
+                              div
+                                    p.text-md.text-gray-800(class="dark:text-white" x-text="'Diffculty - ' + hero.ratings.difficulty")
+                                    input(type="range" min="1" max="10" id="difficulty" class="w-full" x-model="hero.ratings.difficulty")
+                              div
+                                    p.text-md.text-gray-800(class="dark:text-white" x-text="'Offense - ' + hero.ratings.offense")
+                                    input(type="range" min="1" max="10" id="offense" class="w-full" x-model="hero.ratings.offense")
+                              div 
+                                    p.text-md.text-gray-800(class="dark:text-white" x-text="'Crowd Effects - ' + hero.ratings.crowd_effects")
+                                    input(type="range" min="1" max="10" id="crowd_effects" class="w-full" x-model="hero.ratings.crowd_effects")
+                              div
+                                    p.text-md.text-gray-800(class="dark:text-white" x-text="'Durability - ' + hero.ratings.durability")
+                                    input(type="range" min="1" max="10" id="durability" class="w-full" x-model="hero.ratings.durability")
+                              div
+                                    p.text-md.text-gray-800(class="dark:text-white" x-text="'Mobility - ' + hero.ratings.mobility")
+                                    input(type="range" min="1" max="10" id="mobility" class="w-full" x-model="hero.ratings.mobility")
+                              div
+                                    p.text-md.text-gray-800(class="dark:text-white" x-text="'Early Game - ' + hero.ratings.early_game")
+                                    input(type="range" min="1" max="10" id="early_game" class="w-full" x-model="hero.ratings.early_game")
+                              div 
+                                    p.text-md.text-gray-800(class="dark:text-white" x-text="'Mid Game - ' + hero.ratings.mid_game")
+                                    input(type="range" min="1" max="10" id="mid_game" class="w-full" x-model="hero.ratings.mid_game")
+                              div
+                                    p.text-md.text-gray-800(class="dark:text-white" x-text="'Late Game - ' + hero.ratings.late_game")
+                                    input(type="range" min="1" max="10" id="late_game" class="w-full" x-model="hero.ratings.late_game")
+                        div(x-show="openTab === 1")
+                        .grid.grid-cols-1(class="lg:grid-cols-4 md:grid-cols-2 bg-gray-200 dark:bg-gray-900 gap-0.5" x-show="openTab === 2")
+                              .col-span-1(class="lg:col-span-1 md:col-span-2 p-3 shadow-lg bg-gray-100 dark:bg-gray-800")
+                                    div.mt-1
+                                          p.text-md.text-gray-800(class="dark:text-white") Name
+                                          input(type="text" id="skinName" class="w-full px-4 py-3 appearance-none text-sm text-gray-700 bg-white border border-gray-200 rounded-md mt-1 focus:ring-opacity-40 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:dark-blue-300")
+                                    div.mt-4
+                                          p.text-md.text-gray-800(class="dark:text-white") Thumbnail
+                                          label.block.mt-2
+                                                span.sr-only Image
+                                                input.block.w-full.text-sm.text-slate-500(type="file" accept="image/*" class="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100 dark:text-white")
+                                    div.mt-4
+                                          p.text-md.text-gray-800(class="dark:text-white") Image
+                                          label.block.mt-2
+                                                span.sr-only Image
+                                                input.block.w-full.text-sm.text-slate-500(type="file" accept="image/*" class="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100 dark:text-white")
+                                    div.mt-4
+                                          p.text-md.text-gray-800(class="dark:text-white") Banner
+                                          label.block.mt-2
+                                                input.block.w-full.text-sm.text-slate-500(type="file" accept="image/*" class="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100 dark:text-white")
+                                    .mt-4 
+                                          button.text-sm.text-white.bg-blue-700.border.border-blue-700.rounded-md.shadow-md.w-full.px-4.py-2.mt-4(class="hover:bg-blue-800.hover:border-blue-800") Save
+                              .col-span-1(class="lg:col-span-3 md:col-span-2 p-1.5 shadow-lg bg-gray-100 dark:bg-gray-800").overflow-x-auto
+                                    table.table.table-sm#heroes-table
+                                          thead
+                                                tr
+                                                      th
+                                                            span Name
+                                                      th
+                                                            span Thumbnail
+                                                      th
+                                                            span Image
+                                                      th
+                                                            span Banner
+                                                      th
+                                                            span Actions
+                                          tbody
+                                                tr
+                                                      td  Longest Skin Name you'll ever see Placeholder
+                                                      td 
+                                                            button.text-gray-500.transition-colors.duration-200(class="dark:hover:text-blue-500 dark:text-gray-300 hover:text-blue-500 focus:outline-none").w-12 Preview
+                                                      td
+                                                            button.text-gray-500.transition-colors.duration-200(class="dark:hover:text-blue-500 dark:text-gray-300 hover:text-blue-500 focus:outline-none").w-12 Preview
+                                                      td 
+                                                            button.text-gray-500.transition-colors.duration-200(class="dark:hover:text-blue-500 dark:text-gray-300 hover:text-blue-500 focus:outline-none").w-12 Preview
+                                                      td
+                                                            .flex.items.center.gap-x-2
+                                                                  button.text-gray-500.transition-colors.duration-200(class="dark:hover:text-blue-500 dark:text-gray-300 hover:text-blue-500 focus:outline-none").w-12.text-left Edit
+                                                                  button.text-gray-500.transition-colors.duration-200(class="dark:hover:text-red-500 dark:text-gray-300 hover:text-red-500 focus:outline-none").w-12 Delete
+
+                        .grid.gap-4.grid-cols-1(class="lg:grid-cols-4 md:grid-cols-2 p-3" x-show="openTab === 3")
+                              .col-span-1(class="lg:col-span-2 md:col-span-2")
+                                    p.text-md.text-gray-800.font-semibold(class="dark:text-white") HP
+                                    .grid.gap-4.grid-cols-2.mt-1
+                                          div
+                                                p.text-md.text-gray-800(class="dark:text-white") Base
+                                                input(type="number" id="hpBase" class="w-full px-4 py-3 appearance-none text-sm text-gray-700 bg-white border border-gray-200 rounded-md mt-1 focus:ring-opacity-40 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:dark-blue-300" x-model="hero.attributes.hp.base")
+                                          div
+                                                p.text-md.text-gray-800(class="dark:text-white") Growth
+                                                input(type="number" id="hpGrowth" class="w-full px-4 py-3 appearance-none text-sm text-gray-700 bg-white border border-gray-200 rounded-md mt-1 focus:ring-opacity-40 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:dark-blue-300" x-model="hero.attributes.hp.growth")
+
+                                          div
+                                                p.text-md.text-gray-800(class="dark:text-white") Regen Base
+                                                input(type="number" id="hpRegenBase" class="w-full px-4 py-3 appearance-none text-sm text-gray-700 bg-white border border-gray-200 rounded-md mt-1 focus:ring-opacity-40 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:dark-blue-300" x-model="hero.attributes.hpRegen.base")
+                                          div
+                                                p.text-md.text-gray-800(class="dark:text-white") Regen Growth
+                                                input(type="number" id="hpRegenGrowth" class="w-full px-4 py-3 appearance-none text-sm text-gray-700 bg-white border border-gray-200 rounded-md mt-1 focus:ring-opacity-40 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:dark-blue-300" x-model="hero.attributes.hpRegen.growth")
+                              .col-span-1(class="lg:col-span-2 md:col-span-2" x-show="hero.resource !== 'none'")
+                                    p.text-md.text-gray-800.font-semibold(class="dark:text-white" x-text="hero.resource").capitalize 
+                                    .grid.gap-4.grid-cols-2.mt-1
+                                          div
+                                                p.text-md.text-gray-800(class="dark:text-white") Base
+                                                input(type="number" id="resourceBase" class="w-full px-4 py-3 appearance-none text-sm text-gray-700 bg-white border border-gray-200 rounded-md mt-1 focus:ring-opacity-40 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:dark-blue-300" x-model="hero.attributes.resource.base")
+                                          div
+                                                p.text-md.text-gray-800(class="dark:text-white") Growth
+                                                input(type="number" id="resourceGrowth" class="w-full px-4 py-3 appearance-none text-sm text-gray-700 bg-white border border-gray-200 rounded-md mt-1 focus:ring-opacity-40 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:dark-blue-300" x-model="hero.attributes.resource.growth")
+
+                                          div
+                                                p.text-md.text-gray-800(class="dark:text-white") Regen Base
+                                                input(type="number" id="resourceRegenBase" class="w-full px-4 py-3 appearance-none text-sm text-gray-700 bg-white border border-gray-200 rounded-md mt-1 focus:ring-opacity-40 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:dark-blue-300" x-model="hero.attributes.resourceRegen.base")
+                                          div
+                                                p.text-md.text-gray-800(class="dark:text-white") Regen Growth
+                                                input(type="number" id="resourceRegenGrowth" class="w-full px-4 py-3 appearance-none text-sm text-gray-700 bg-white border border-gray-200 rounded-md mt-1 focus:ring-opacity-40 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:dark-blue-300" x-model="hero.attributes.resourceRegen.growth")
+                              .col-span-1(class="lg:col-span-2 md:col-span-2")
+                                    p.text-md.text-gray-800.font-semibold(class="dark:text-white") Physical
+                                    .grid.gap-4.grid-cols-2.mt-1
+                                          div
+                                                p.text-md.text-gray-800(class="dark:text-white") Attack Base
+                                                input(type="number" id="physicalAttackBase" class="w-full px-4 py-3 appearance-none text-sm text-gray-700 bg-white border border-gray-200 rounded-md mt-1 focus:ring-opacity-40 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:dark-blue-300" x-model="hero.attributes.physicalAttack.base")
+                                          div
+                                                p.text-md.text-gray-800(class="dark:text-white") Attack Growth
+                                                input(type="number" id="physicalAttackGrowth" class="w-full px-4 py-3 appearance-none text-sm text-gray-700 bg-white border border-gray-200 rounded-md mt-1 focus:ring-opacity-40 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:dark-blue-300" x-model="hero.attributes.physicalAttack.growth")
+                                          div
+                                                p.text-md.text-gray-800(class="dark:text-white") Defense Base
+                                                input(type="number" id="physicalDefenseBase" class="w-full px-4 py-3 appearance-none text-sm text-gray-700 bg-white border border-gray-200 rounded-md mt-1 focus:ring-opacity-40 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:dark-blue-300" x-model="hero.attributes.physicalDefense.base")
+                                          div
+                                                p.text-md.text-gray-800(class="dark:text-white") Defense Growth
+                                                input(type="number" id="physicalDefenseGrowth" class="w-full px-4 py-3 appearance-none text-sm text-gray-700 bg-white border border-gray-200 rounded-md mt-1 focus:ring-opacity-40 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:dark-blue-300" x-model="hero.attributes.physicalDefense.growth")
+                              .col-span-1(class="lg:col-span-2 md:col-span-2")
+                                    p.text-md.text-gray-800.font-semibold(class="dark:text-white") Magic
+                                    .grid.gap-4.grid-cols-2.mt-1
+                                          div
+                                                p.text-md.text-gray-800(class="dark:text-white") Power Base
+                                                input(type="number" id="magicPower" class="w-full px-4 py-3 appearance-none text-sm text-gray-700 bg-white border border-gray-200 rounded-md mt-1 focus:ring-opacity-40 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:dark-blue-300" x-model="hero.attributes.magicPower.base")
+                                          div
+                                                p.text-md.text-gray-800(class="dark:text-white") Power Growth
+                                                input(type="number" id="magicPowerGrowth" class="w-full px-4 py-3 appearance-none text-sm text-gray-700 bg-white border border-gray-200 rounded-md mt-1 focus:ring-opacity-40 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:dark-blue-300" x-model="hero.attributes.magicPower.growth")
+                                          div
+                                                p.text-md.text-gray-800(class="dark:text-white") Defense Base
+                                                input(type="number" id="magicDefenseBase" class="w-full px-4 py-3 appearance-none text-sm text-gray-700 bg-white border border-gray-200 rounded-md mt-1 focus:ring-opacity-40 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:dark-blue-300" x-model="hero.attributes.magicDefense.base")
+                                          div
+                                                p.text-md.text-gray-800(class="dark:text-white") Defense Growth
+                                                input(type="number" id="magicDefenseGrowth" class="w-full px-4 py-3 appearance-none text-sm text-gray-700 bg-white border border-gray-200 rounded-md mt-1 focus:ring-opacity-40 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:dark-blue-300" x-model="hero.attributes.magicDefense.growth")
+                              .col-span-1(class="lg:col-span-2 md:col-span-2")
+                                    p.text-md.text-gray-800.font-semibold(class="dark:text-white") Attack Speed
+                                    .grid.gap-4.grid-cols-2.mt-1
+                                          div
+                                                p.text-md.text-gray-800(class="dark:text-white") Base
+                                                input(type="number" id="attackSpeedBase" class="w-full px-4 py-3 appearance-none text-sm text-gray-700 bg-white border border-gray-200 rounded-md mt-1 focus:ring-opacity-40 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:dark-blue-300" x-model="hero.attributes.attackSpeed.base")
+                                          div
+                                                p.text-md.text-gray-800(class="dark:text-white") Growth
+                                                input(type="number" id="attackSpeedGrowth" class="w-full px-4 py-3 appearance-none text-sm text-gray-700 bg-white border border-gray-200 rounded-md mt-1 focus:ring-opacity-40 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:dark-blue-300" x-model="hero.attributes.attackSpeed.growth")
+                                          div
+                                                p.text-md.text-gray-800(class="dark:text-white") Ratio %
+                                                input(type="number" id="attackSpeedRatio" class="w-full px-4 py-3 appearance-none text-sm text-gray-700 bg-white border border-gray-200 rounded-md mt-1 focus:ring-opacity-40 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:dark-blue-300" x-model="hero.attributes.attackSpeedRatio.percentage")
+                              .col-span-1(class="lg:col-span-2 md:col-span-2")
+                                    label.text-md.text-gray-800.font-semibold(class="dark:text-white") 
+                                          | Basic Attack Range
+                                          //create alternate ratio
+                                    label(class="dark:text-white relative inline-flex cursor-pointer items-center").float-right
+                                          input(type="checkbox" id="switch" @click="alternateBasicRange = !alternateBasicRange" x-model="alternateBasicRange").peer.sr-only
+                                          label(class="hidden" for="switch")
+                                          div(class="peer h-6 w-11 rounded-full border bg-slate-200 after:absolute after:left-[2px] after:top-0.5 after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-slate-800 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:ring-green-300 mr-2")
+                                          | Alternate
+
+                                    .grid.gap-4.grid-cols-2.mt-1
+                                          div
+                                                p.text-md.text-gray-800(class="dark:text-white") Name
+                                                input(type="text" id="basicAttackRangeBaseName" class="w-full px-4 py-3 appearance-none text-sm text-gray-700 bg-white border border-gray-200 rounded-md mt-1 focus:ring-opacity-40 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:dark-blue-300" :disabled="!alternateBasicRange" x-model="hero.attributes.basicAttackRange.baseName")
+                                          div 
+                                                p.text-md.text-gray-800(class="dark:text-white") Value
+                                                input(type="number" id="basicAttackRangeBase" class="w-full px-4 py-3 appearance-none text-sm text-gray-700 bg-white border border-gray-200 rounded-md mt-1 focus:ring-opacity-40 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:dark-blue-300" x-model="hero.attributes.basicAttackRange.base")
+                                          div(x-show="alternateBasicRange")
+                                                p.text-md.text-gray-800(class="dark:text-white") Alternate
+                                                input(type="text" id="basicAttackRangeAlternateName" class="w-full px-4 py-3 appearance-none text-sm text-gray-700 bg-white border border-gray-200 rounded-md mt-1 focus:ring-opacity-40 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:dark-blue-300" x-model="hero.attributes.basicAttackRange.alternateName")
+                                          div(x-show="alternateBasicRange")
+                                                p.text-md.text-gray-800(class="dark:text-white") Value
+                                                input(type="number" id="basicAttackRangeAlternate" class="w-full px-4 py-3 appearance-none text-sm text-gray-700 bg-white border border-gray-200 rounded-md mt-1 focus:ring-opacity-40 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:dark-blue-300" x-model="hero.attributes.basicAttackRange.alternate")
+                              .col-span-1(class="lg:col-span-2 md:col-span-2")
+                                    p.text-md.text-gray-800.font-semibold(class="dark:text-white") Critical
+                                    .grid.gap-4.grid-cols-2.mt-1
+                                          div
+                                                p.text-md.text-gray-800(class="dark:text-white") Chance %
+                                                input(type="number" id="criticalChancePercentage" class="w-full px-4 py-3 appearance-none text-sm text-gray-700 bg-white border border-gray-200 rounded-md mt-1 focus:ring-opacity-40 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:dark-blue-300" x-model="hero.attributes.criticalChance.percentage")
+                                          div
+                                                p.text-md.text-gray-800(class="dark:text-white") Damage %
+                                                input(type="number" id="criticalDamagePercentage" class="w-full px-4 py-3 appearance-none text-sm text-gray-700 bg-white border border-gray-200 rounded-md mt-1 focus:ring-opacity-40 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:dark-blue-300" x-model="hero.attributes.criticalDamage.percentage")
+                                          div
+                                                p.text-md.text-gray-800(class="dark:text-white") Damage Reduction %
+                                                input(type="number" id="criticalDamageReduction" class="w-full px-4 py-3 appearance-none text-sm text-gray-700 bg-white border border-gray-200 rounded-md mt-1 focus:ring-opacity-40 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:dark-blue-300" x-model="hero.attributes.criticalDamageReduction.percentage")
+                              .col-span-1(class="lg:col-span-2 md:col-span-2")
+                                    p.text-md.text-gray-800.font-semibold(class="dark:text-white") Healing
+                                    .grid.gap-4.grid-cols-2.mt-1
+                                          div
+                                                p.text-md.text-gray-800(class="dark:text-white") Effect %
+                                                input(type="number" id="healingEffectPercentage" class="w-full px-4 py-3 appearance-none text-sm text-gray-700 bg-white border border-gray-200 rounded-md mt-1 focus:ring-opacity-40 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:dark-blue-300" x-model="hero.attributes.healingEffect.percentage")
+                                          div
+                                                p.text-md.text-gray-800(class="dark:text-white") Received %
+                                                input(type="number" id="healingReceivedPercentage" class="w-full px-4 py-3 appearance-none text-sm text-gray-700 bg-white border border-gray-200 rounded-md mt-1 focus:ring-opacity-40 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:dark-blue-300" x-model="hero.attributes.healingReceived.percentage")
+                                          div
+                                                p.text-md.text-gray-800(class="dark:text-white") Lifesteal %
+                                                input(type="number" id="lifestealPercentage" class="w-full px-4 py-3 appearance-none text-sm text-gray-700 bg-white border border-gray-200 rounded-md mt-1 focus:ring-opacity-40 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:dark-blue-300" x-model="hero.attributes.lifesteal.percentage")
+                                          div
+                                                p.text-md.text-gray-800(class="dark:text-white") Spell Vamp %
+                                                input(type="number" id="spellVampPercentage" class="w-full px-4 py-3 appearance-none text-sm text-gray-700 bg-white border border-gray-200 rounded-md mt-1 focus:ring-opacity-40 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:dark-blue-300" x-model="hero.attributes.spellVamp.percentage")
+                              .col-span-1(class="lg:col-span-4 md:col-span-2")
+                                    p.text-md.text-gray-800.font-semibold(class="dark:text-white") Others
+                              div
+                                    p.text-md.text-gray-800(class="dark:text-white") Movement Speed
+                                    input(type="number" id="movementSpeedBase" class="w-full px-4 py-3 appearance-none text-sm text-gray-700 bg-white border border-gray-200 rounded-md mt-1 focus:ring-opacity-40 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:dark-blue-300" x-model="hero.attributes.movementSpeed.base")
+                              div
+                                    p.text-md.text-gray-800(class="dark:text-white") Resilience %
+                                    input(type="number" id="resiliencePercentage" class="w-full px-4 py-3 appearance-none text-sm text-gray-700 bg-white border border-gray-200 rounded-md mt-1 focus:ring-opacity-40 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:dark-blue-300" x-model="hero.attributes.resilience.percentage")
+                              div
+                                    p.text-md.text-gray-800(class="dark:text-white") Damage Reduction %
+                                    input(type="number" id="damageReductionPercentage" class="w-full px-4 py-3 appearance-none text-sm text-gray-700 bg-white border border-gray-200 rounded-md mt-1 focus:ring-opacity-40 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:dark-blue-300" x-model="hero.attributes.damageReduction.percentage")
+                              div
+                                    p.text-md.text-gray-800(class="dark:text-white") Cooldown Reduction %
+                                    input(type="number" id="cooldownReductionPercentage" class="w-full px-4 py-3 appearance-none text-sm text-gray-700 bg-white border border-gray-200 rounded-md mt-1 focus:ring-opacity-40 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:dark-blue-300" x-model="hero.attributes.cooldownReduction.percentage")
+
+block scripts 
+      script.
+            var loadThumbnail = function(event) {
+                  var output = document.getElementById('thumbnail');
+                  output.src = URL.createObjectURL(event.target.files[0]);
+                  output.onload = function(){
+                        URL.revokeObjectURL(output.src)
+                  }
+            };
+            const resources = JSON.parse(`!{JSON.stringify(resources)}`)
+            const roles = JSON.parse(`!{JSON.stringify(roles)}`)
+            const skillTags = JSON.parse(`!{JSON.stringify(skillTags)}`)
+
+            document.addEventListener('alpine:init', () => {
+                  Alpine.data('heroData', () => ({
+                        hero: {},
+                        roles: roles,
+                        resources: resources,
+                        skillTags: skillTags,
+                        alternateBasicRange: false,
+
+                        fetchHero () {
+                              const url = new URL(window.location.href)
+                              const id = url.pathname.split('/').pop()
+
+                              axios.get(`/dash/hero/${id}`)
+                                    .then(response => {
+                                          this.hero = response.data
+
+                                          if (this.hero.attributes.basicAttackRange.alternate > 0) {
+                                                this.alternateBasicRange = true
+                                          }
+
+                                          if(this.hero.ratings.difficulty === null || this.hero.ratings.difficulty === 0){
+                                                this.hero.ratings.difficulty = 1
+                                          }
+                                          if(this.hero.ratings.offense === null || this.hero.ratings.offense === 0){
+                                                this.hero.ratings.offense = 1
+                                          }
+                                          if(this.hero.ratings.crowd_effects === null || this.hero.ratings.crowd_effects === 0){
+                                                this.hero.ratings.crowd_effects = 1
+                                          }
+                                          if(this.hero.ratings.durability === null || this.hero.ratings.durability === 0){
+                                                this.hero.ratings.durability = 1
+                                          }
+                                          if(this.hero.ratings.mobility === null || this.hero.ratings.mobility === 0){
+                                                this.hero.ratings.mobility = 1
+                                          }
+                                          if(this.hero.ratings.early_game === null || this.hero.ratings.early_game === 0){
+                                                this.hero.ratings.early_game = 1
+                                          }
+                                          if(this.hero.ratings.mid_game === null || this.hero.ratings.mid_game === 0){
+                                                this.hero.ratings.mid_game = 1
+                                          }
+                                          if(this.hero.ratings.late_game === null || this.hero.ratings.late_game === 0){
+                                                this.hero.ratings.late_game = 1
+                                          }
+
+                                    })
+                                    .catch(error => {
+                                          console.log(error)
+                                    })
+                        },
+
+                        init(){
+                              this.fetchHero()
+                        }
+                  }))
+            })

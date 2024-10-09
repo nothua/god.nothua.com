@@ -2,6 +2,8 @@ import axios from "axios";
 import { HEROES } from "../src/urls";
 import { convertToHTML5, getServiceLocator, parseSkills } from "../src/utils";
 import type HeroRepository from "../src/repositories/HeroRepository";
+import { ImageRepository } from "../src/classes/ImageRepository";
+import { Binary } from "mongodb";
 
 export async function getHeroesCount() {
       const heroes = await axios.post(HEROES(), {
@@ -46,6 +48,7 @@ export async function fetchHeroes() {
 
 export async function updateHeroes() {
       const heroes_ = await fetchHeroes();
+      const imageRepo = ImageRepository.getInstance();
 
       const heroRepo =
             getServiceLocator().resolve<HeroRepository>("HeroRepository");
@@ -65,8 +68,28 @@ export async function updateHeroes() {
 
             hero["story"] = hero_data.story;
 
-            hero["painting"] = hero_data.painting;
-            hero["thumbnail"] = hero_data.head;
+            const painting = await axios.get(hero_data.painting, {
+                  responseType: "arraybuffer",
+            });
+            const paintingBinary = new Binary(Buffer.from(painting.data));
+
+            const paitingUrl = await imageRepo.addImage(
+                  "heroes/painting/" + hero["_id"] + ".png",
+                  paintingBinary
+            );
+            hero["painting"] = paitingUrl;
+
+            const head = await axios.get(hero_data.head, {
+                  responseType: "arraybuffer",
+            });
+
+            const headBinary = new Binary(Buffer.from(head.data));
+
+            const thumbnailUrl = await imageRepo.addImage(
+                  "heroes/thumbnail/" + hero["_id"] + ".png",
+                  headBinary
+            );
+            hero["thumbnail"] = thumbnailUrl;
 
             hero["skills"] = [];
 
@@ -108,4 +131,6 @@ export async function updateHeroes() {
 
             heroRepo.upsert(hero);
       }
+
+      await imageRepo.startTransaction();
 }

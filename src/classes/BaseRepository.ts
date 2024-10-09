@@ -1,7 +1,7 @@
 import { Model, Document } from "mongoose";
 
 class BaseRepository<T extends Document> {
-      constructor(private model: Model<T>) {}
+      constructor(public model: Model<T>) {}
 
       async create(data: Partial<T>): Promise<T> {
             const newDocument = new this.model(data);
@@ -22,6 +22,10 @@ class BaseRepository<T extends Document> {
 
       async get(id: string): Promise<T | null> {
             return this.model.findById(id);
+      }
+
+      async getByField(field: string, value: string): Promise<T | null> {
+            return this.model.findOne({ [field as any]: value });
       }
 
       async upsert(data: Partial<T> & { _id?: string }): Promise<T | null> {

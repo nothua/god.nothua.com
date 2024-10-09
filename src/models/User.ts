@@ -7,8 +7,12 @@ export enum Role {
 
 const schema = new Schema({
       name: String,
+      username: String,
       password: String,
-      revoked: String,
+      revoked: {
+            type: Boolean,
+            default: false,
+      },
       role: {
             type: String,
             enum: Role,

@@ -14,7 +14,7 @@ block content
         .mt-6(class="md:flex md:items-center md:justify-between")
             .inline-flex.overflow-hidden.bg-white.border.divide-x.rounded-lg(class="dark:bg-gray-900 rtl:flex-row-reverse dark:border-gray-700 dark:divide-gray-700")#filter-buttons
                 template(x-for="(item, index) in filterButtons" :key="index")
-                    button(:class="getClassNames(item.query === roleFilt er)" @click="roleFilter = item.query; searchUsers()" x-text="item.title")
+                    button(:class="getClassNames(item.query === roleFilter)" @click="roleFilter = item.query; searchUsers()" x-text="item.title")
             .relative.flex-items-center.mt-4(class="md:mt-0")
                 span.absolute
                     i.fas.fa-search.w-5.h-5.mx-3.text-gray-400(class="dark:text-gray-600 mt-2.5")
@@ -49,7 +49,7 @@ block content
                                     th(class="rtl:text-right dark:text-gray-400 py-3.5" scope="col").px-12.text-sm.font-small.text-start.text-gray-500
                                         span Actions
                             tbody.bg-white.divide-y.divide-gray-200(class="dark:divide-gray-700 dark:bg-gray-900")
-                                template(x-for="user in filteredUsers" :key="user.id")
+                                template(x-for="user in filteredUsers" :key="user._id")
                                     tr
                                         td.px-4.py-4.text-sm.font-medium.whitespace-nowrap.text-gray-800(class="dark:text-white" x-text="user.username")
                                         td.px-12.py-4.text-sm.font-medium.whitespace-nowrap.text-gray-800(class="dark:text-white" x-text="user.name")
@@ -58,8 +58,8 @@ block content
                                                 b(x-text="user.role")
                                         td.px-12.py-4.text-sm.whitespace-nowrap
                                             .flex.tems.center.gap-x-6
-                                                button.text-gray-500.transition-colors.duration-200(class="dark:hover:text-red-500 dark:text-gray-300 hover:text-red-500 focus:outline-none" @click="toggleAccess(user.revoked, user.id)" x-text="!user.revoked ? 'Revoke' : 'Activate'").w-12.text-center
-                                                button.text-gray-500.transition-colors.duration-200(class="dark:hover:text-red-500 dark:text-gray-300 hover:text-red-500 focus:outline-none" @click="deleteUser(user.id)").w-12.text-center Delete
+                                                button.text-gray-500.transition-colors.duration-200(class="dark:hover:text-red-500 dark:text-gray-300 hover:text-red-500 focus:outline-none" @click="toggleAccess(user.revoked, user._id)" x-text="!user.revoked ? 'Revoke' : 'Activate'").w-12.text-center
+                                                button.text-gray-500.transition-colors.duration-200(class="dark:hover:text-red-500 dark:text-gray-300 hover:text-red-500 focus:outline-none" @click="deleteUser(user._id)").w-12.text-center Delete
 
 
         #modal(x-show="isOpen")
@@ -88,7 +88,7 @@ block content
                                 select.block.w-full.px-4.py-3.text-sm.text-gray-700.bg-white.border.border-gray-200.rounded-md(class="focus:ring-opacity-40 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue 300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:dark-blue-300" name="create_role" aria-label="Role" x-model="create_role")
                                     option(value="" default hidden) Select role
                                     option(value="admin") Admin
-                                    option(value="moderator") Moderator
+                                    option(value="user") User
 
                             button.px-6.py-2.font-medium.tracking-wide.text-white.capitalize.transition-colors.duration-300.transform.bg-blue-600.rounded-lg(class="hover:bg-blue-500 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-80 w-full mt-4")
                                 | Add User
@@ -115,7 +115,7 @@ block scripts
                     preloader.classList.remove("hidden")
 
                     try{
-                        const response = await axios.get("/users/list", {})
+                        const response = await axios.get("/dash/users/list", {})
                         this.users = response.data
                     }catch (error){
                         this.users = []
@@ -151,11 +151,14 @@ block scripts
                 },
 
                 async createUser(){
+                    if(this.isCreating) return;
+
                     const preloader = document.getElementById("preloader")
                     preloader.classList.remove("hidden")
 
+                    this.isCreating = true; 
                     try{
-                        const response = await axios.post("/users/create", {
+                        const response = await axios.post("/dash/users/create", {
                             name: this.create_name,
                             username: this.create_username,
                             password: this.create_password,
@@ -175,6 +178,8 @@ block scripts
                     } catch (error){
                         console.log(error)
                         showAlert("error", "Something happened. Please try again")
+                    } finally {
+                        this.isCreating = false; 
                     }
 
                     await this.loadUsers()
@@ -200,11 +205,13 @@ block scripts
 
                 async deleteUser(id){
                     showModal("Are you sure you want to delete?", "Deleting the user will delete all the data associated with it.", "Delete", async () => {
+                        if(this.isDeleting) return;
                         const preloader = document.getElementById("preloader")
                         preloader.classList.remove("hidden")
 
+                        this.isDeleting = true; 
                         try{
-                            const response = await axios.delete(`/users/delete/${id}`)
+                            const response = await axios.delete(`/dash/users/delete/${id}`)
 
                             if(response.data.success)
                                 showAlert("success", response.data.message)
@@ -213,6 +220,8 @@ block scripts
                         }catch (error){
                             console.log(error.message)
                             showAlert("error", "Something happened. Please try again")
+                        } finally { 
+                            this.isDeleting = false; 
                         }
 
                         await this.loadUsers()
@@ -225,11 +234,13 @@ block scripts
                     const confirmName = !revoked ? "Revoke Access" : "Grant Access"
 
                     showModal(title, description, confirmName, async () => {
+                        if (this.isToggling) return;
                         const preloader = document.getElementById("preloader")
                         preloader.classList.remove("hidden")
 
+                        this.isToggling = true; 
                         try{
-                            const response = await axios.get(`/users/access/${id}`)
+                            const response = await axios.get(`/dash/users/access/${id}`)
 
                             if(response.data.success)
                                 showAlert("success", response.data.message)
@@ -238,6 +249,8 @@ block scripts
                         }catch (error){
                             console.log(error)
                             showAlert("error", "Something happened. Please try again")
+                        }finally { 
+                            this.isToggling = false; 
                         }
 
                         await this.loadUsers()

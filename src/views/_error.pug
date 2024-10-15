@@ -1,10 +1,10 @@
 doctype html
-html(lang="en")
+html(lang="en" class="dark")
     head
         meta(charset="UTF-8")
-        meta(name="viewport", content="width=device-width, initial-scale=1.0")
+        meta(name="viewport" content="width=device-width, initial-scale=1.0")
         title= title
+        link(rel="stylesheet" href="/css/tailwind.css")
     body
         .grid.h-screen.place-content-center.bg-white.px-4(class="dark:bg-gray-900")
             h1.uppercase.tracking-widest.text-gray-500(class="dark:text-gray-400")= title + " | " + message
-        link(rel="stylesheet", href="/css/tailwind.css")

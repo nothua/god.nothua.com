@@ -73,8 +73,9 @@ export async function updateHeroes() {
             });
             const paintingBinary = new Binary(Buffer.from(painting.data));
 
-            const paitingUrl = await imageRepo.addImage(
-                  "heroes/painting/" + hero["_id"] + ".png",
+            const paitingUrl = await imageRepo.uploadImage(
+                  "heroes/painting/",
+                  hero["_id"],
                   paintingBinary
             );
             hero["painting"] = paitingUrl;
@@ -85,8 +86,9 @@ export async function updateHeroes() {
 
             const headBinary = new Binary(Buffer.from(head.data));
 
-            const thumbnailUrl = await imageRepo.addImage(
-                  "heroes/thumbnail/" + hero["_id"] + ".png",
+            const thumbnailUrl = await imageRepo.uploadImage(
+                  "heroes/thumbnail/",
+                  hero["_id"],
                   headBinary
             );
             hero["thumbnail"] = thumbnailUrl;
@@ -131,6 +133,4 @@ export async function updateHeroes() {
 
             heroRepo.upsert(hero);
       }
-
-      await imageRepo.startTransaction();
 }

@@ -55,6 +55,18 @@ export enum SkillType {
       "Passive" = "passive",
 }
 
+export enum SkinRarity {
+      "Common" = "common",
+      "Elite" = "elite",
+      "Special" = "special",
+      "Starlight" = "starlight",
+      "Epic" = "epic",
+      "Collector" = "collector",
+      "Luckybox" = "Luckybox",
+      "Event" = "event",
+      "Legend" = "legend",
+}
+
 const schema = new Schema({
       _id: { type: Number, required: true },
       name: { type: String, required: true },
@@ -73,7 +85,11 @@ const schema = new Schema({
                   banner: { type: String },
                   thumbnail: { type: String },
                   default: { type: Boolean },
-                  tag: { type: String },
+                  rarity: {
+                        type: String,
+                        enum: Object.values(SkinRarity),
+                        default: SkinRarity.Common,
+                  },
             },
       ],
       role: {

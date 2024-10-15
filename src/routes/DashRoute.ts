@@ -149,8 +149,6 @@ router.get(`/heroes/list`, async (req: Request, res: Response) => {
                               thumbnail: hero.thumbnail,
                         };
 
-                        console.log(data);
-
                         return data;
                   })
                   .sort((a: any, b: any) => {
@@ -161,7 +159,7 @@ router.get(`/heroes/list`, async (req: Request, res: Response) => {
 
             res.json(data);
       } catch (ex) {
-            console.log(ex);
+            console.error(ex);
       }
 });
 

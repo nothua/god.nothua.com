@@ -91,7 +91,7 @@ block content
                                           label.block.mt-2
                                                 input.block.w-full.text-sm.text-slate-500(type="file" accept="image/*" class="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100 dark:text-white")
                                     .mt-4 
-                                          button.text-sm.text-white.bg-blue-700.border.border-blue-700.rounded-md.shadow-md.w-full.px-4.py-2.mt-4(class="hover:bg-blue-800.hover:border-blue-800") Save
+                                          button.text-sm.text-white.bg-blue-700.border.border-blue-700.rounded-md.shadow-md.w-full.px-4.py-2.mt-4(class="hover:bg-blue-800.hover:border-blue-800" @click="addSkin") Save
                               .col-span-1(class="lg:col-span-3 md:col-span-2 p-1.5 shadow-lg bg-gray-100 dark:bg-gray-800").overflow-x-auto
                                     table.table.table-sm#heroes-table
                                           thead
@@ -107,18 +107,19 @@ block content
                                                       th
                                                             span Actions
                                           tbody
-                                                tr
-                                                      td  Longest Skin Name you'll ever see Placeholder
-                                                      td 
-                                                            button.text-gray-500.transition-colors.duration-200(class="dark:hover:text-blue-500 dark:text-gray-300 hover:text-blue-500 focus:outline-none").w-12 Preview
-                                                      td
-                                                            button.text-gray-500.transition-colors.duration-200(class="dark:hover:text-blue-500 dark:text-gray-300 hover:text-blue-500 focus:outline-none").w-12 Preview
-                                                      td 
-                                                            button.text-gray-500.transition-colors.duration-200(class="dark:hover:text-blue-500 dark:text-gray-300 hover:text-blue-500 focus:outline-none").w-12 Preview
-                                                      td
-                                                            .flex.items.center.gap-x-2
-                                                                  button.text-gray-500.transition-colors.duration-200(class="dark:hover:text-blue-500 dark:text-gray-300 hover:text-blue-500 focus:outline-none").w-12.text-left Edit
-                                                                  button.text-gray-500.transition-colors.duration-200(class="dark:hover:text-red-500 dark:text-gray-300 hover:text-red-500 focus:outline-none").w-12 Delete
+                                                template(x-for="skin in hero.skins")
+                                                      tr
+                                                            td(x-text="skin.name")
+                                                            td 
+                                                                  button.text-gray-500.transition-colors.duration-200(class="dark:hover:text-blue-500 dark:text-gray-300 hover:text-blue-500 focus:outline-none").w-12 Preview
+                                                            td
+                                                                  button.text-gray-500.transition-colors.duration-200(class="dark:hover:text-blue-500 dark:text-gray-300 hover:text-blue-500 focus:outline-none").w-12 Preview
+                                                            td 
+                                                                  button.text-gray-500.transition-colors.duration-200(class="dark:hover:text-blue-500 dark:text-gray-300 hover:text-blue-500 focus:outline-none").w-12 Preview
+                                                            td
+                                                                  .flex.items.center.gap-x-2
+                                                                        button.text-gray-500.transition-colors.duration-200(class="dark:hover:text-blue-500 dark:text-gray-300 hover:text-blue-500 focus:outline-none").w-12.text-left Edit
+                                                                        button.text-gray-500.transition-colors.duration-200(class="dark:hover:text-red-500 dark:text-gray-300 hover:text-red-500 focus:outline-none").w-12 Delete
 
                         .grid.gap-4.grid-cols-1(class="lg:grid-cols-4 md:grid-cols-2 p-3" x-show="openTab === 3")
                               .col-span-1(class="lg:col-span-2 md:col-span-2")

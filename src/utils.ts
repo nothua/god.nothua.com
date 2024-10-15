@@ -92,3 +92,7 @@ export async function convertToHTML5(skillDesc: any) {
             )
             .replace(/\n/g, "<br>");
 }
+
+export function reform_string(str: String) {
+      return str.replace(/[^A-Z0-9]+/gi, "_").toLowerCase();
+}

@@ -2,8 +2,10 @@ doctype html
 html(lang="en")
     head
         meta(charset="UTF-8")
-        meta(name="viewport", content="width=device-width, initial-scale=1.0")
+        meta(name="viewport" content="width=device-width, initial-scale=1.0")
         title= title
+        link(rel='stylesheet' href='/lib/fontawesome/css/all.min.css')
+        link(rel="stylesheet" href="/css/tailwind.css")
     body(class="bg-gray-100 dark:bg-gray-800")
         .relative.min-h-screen(class="lg:flex")
             header.text-gray-100.bg-gray-800(class="lg:hidden")
@@ -67,8 +69,6 @@ html(lang="en")
                     button.px-4.py-2.rounded-lg.text-white.text-sm.tracking-wide.bg-red-500(class="hover:bg-red-600 active:bg-red-500").transition#cconfirm-button Delete
                     button.px-4.py-2.rounded-lg.text-sm.tracking-wide.bg-gray-200.text-gray-800(class="hover:bg-gray-300 active:bg-gray-200").transition#ccancel-button Cancel
 
-        link(rel='stylesheet' href='/lib/fontawesome/css/all.min.css')
-        link(rel="stylesheet", href="/css/tailwind.css")
         script(src="/js/toggle-theme.js", defer)
         script(src="/js/script.js", defer)
         script(src="/js/axios.js", defer)

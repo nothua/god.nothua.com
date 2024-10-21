@@ -4,133 +4,151 @@ import { convertToHTML5, getServiceLocator, parseSkills } from "../src/utils";
 import type HeroRepository from "../src/repositories/HeroRepository";
 import { ImageRepository } from "../src/classes/ImageRepository";
 import { Binary } from "mongodb";
+import * as cheerio from "cheerio";
 
 export async function getHeroesCount() {
-      const heroes = await axios.post(HEROES(), {
-            pageSize: 1,
-            filters: [],
-            sorts: [],
-            pageIndex: 1,
-            fields: ["main_heroid"],
-      });
+    const heroes = await axios.post(HEROES(), {
+        pageSize: 1,
+        filters: [],
+        sorts: [],
+        pageIndex: 1,
+        fields: ["main_heroid"],
+    });
 
-      return heroes.data.data.total;
+    return heroes.data.data.total;
 }
 
 export async function fetchHeroes() {
-      const heroes_req = await axios.post(HEROES(), {
-            pageSize: await getHeroesCount(),
-            sorts: [
-                  {
-                        data: { field: "hero_id", order: "asc" },
-                        type: "sequence",
-                  },
-            ],
-            pageIndex: 1,
-            fields: [
-                  "hero_id",
-                  "hero.data.name",
-                  "hero.data.smallmap",
-                  "hero.data.heroskilllist",
-                  "hero.data.painting",
-                  "hero.data.head",
-                  "hero.data.sortlabel",
-                  "hero.data.head",
-                  "hero.data.story",
-            ],
-            object: [],
-      });
+    const heroes_req = await axios.post(HEROES(), {
+        pageSize: await getHeroesCount(),
+        sorts: [
+            {
+                data: { field: "hero_id", order: "asc" },
+                type: "sequence",
+            },
+        ],
+        pageIndex: 1,
+        fields: [
+            "hero_id",
+            "hero.data.name",
+            "hero.data.smallmap",
+            "hero.data.heroskilllist",
+            "hero.data.painting",
+            "hero.data.head",
+            "hero.data.sortlabel",
+            "hero.data.head",
+            "hero.data.story",
+        ],
+        object: [],
+    });
 
-      const heroes_res = heroes_req.data.data.records;
+    const heroes_res = heroes_req.data.data.records;
 
-      return heroes_res;
+    return heroes_res;
 }
 
 export async function updateHeroes() {
-      const heroes_ = await fetchHeroes();
-      const imageRepo = ImageRepository.getInstance();
+    const heroes_ = await fetchHeroes();
+    const imageRepo = ImageRepository.getInstance();
 
-      const heroRepo =
-            getServiceLocator().resolve<HeroRepository>("HeroRepository");
-      for (const hero_ of heroes_) {
-            const hero = {} as any;
-            const hero_data = hero_.data.hero.data;
-            hero["_id"] = hero_.data.hero_id;
+    const heroRepo =
+        getServiceLocator().resolve<HeroRepository>("HeroRepository");
+    for (const hero_ of heroes_) {
+        console.log("Updating hero: ", hero_.data.hero.data.name);
+        const hero = {} as any;
+        const hero_data = hero_.data.hero.data;
+        hero["_id"] = hero_.data.hero_id;
 
-            hero["name"] = hero_data.name;
+        hero["name"] = hero_data.name;
 
-            const sortlabel = hero_data.sortlabel;
+        const sortlabel = hero_data.sortlabel;
 
-            hero["role"] = {
-                  primary: sortlabel[0].toLowerCase(),
-                  secondary: sortlabel[1].toLowerCase(),
-            };
+        hero["role"] = {
+            primary: sortlabel[0].toLowerCase(),
+            secondary: sortlabel[1].toLowerCase(),
+        };
 
-            hero["story"] = hero_data.story;
+        hero["story"] = hero_data.story;
 
-            const painting = await axios.get(hero_data.painting, {
-                  responseType: "arraybuffer",
-            });
-            const paintingBinary = new Binary(Buffer.from(painting.data));
+        const painting = await axios.get(hero_data.painting, {
+            responseType: "arraybuffer",
+        });
+        const paintingBinary = new Binary(Buffer.from(painting.data));
 
-            const paitingUrl = await imageRepo.uploadImage(
-                  "heroes/painting/",
-                  hero["_id"],
-                  paintingBinary
-            );
-            hero["painting"] = paitingUrl;
+        const paitingUrl = await imageRepo.uploadImage(
+            "heroes/painting/",
+            hero["_id"],
+            paintingBinary
+        );
+        hero["painting"] = paitingUrl;
 
-            const head = await axios.get(hero_data.head, {
-                  responseType: "arraybuffer",
-            });
+        const head = await axios.get(hero_data.head, {
+            responseType: "arraybuffer",
+        });
 
-            const headBinary = new Binary(Buffer.from(head.data));
+        const headBinary = new Binary(Buffer.from(head.data));
 
-            const thumbnailUrl = await imageRepo.uploadImage(
-                  "heroes/thumbnail/",
-                  hero["_id"],
-                  headBinary
-            );
-            hero["thumbnail"] = thumbnailUrl;
+        const thumbnailUrl = await imageRepo.uploadImage(
+            "heroes/thumbnail/",
+            hero["_id"],
+            headBinary
+        );
+        hero["thumbnail"] = thumbnailUrl;
 
-            hero["skills"] = [];
+        hero["skills"] = [];
 
-            for (const _ of hero_data.heroskilllist) {
-                  for (const skill_ of _.skilllist) {
-                        let skill = hero["skills"].find(
-                              (s: any) =>
-                                    s.id === skill_.skillid &&
-                                    s.name === skill_.skillname
-                        ) || {
-                              id: skill_.skillid,
-                              name: skill_.skillname,
-                              description: await convertToHTML5(
-                                    skill_["skilldesc"]
-                              ),
-                              images: [
-                                    {
-                                          icon: skill_["skillicon"],
-                                          default: true,
-                                    },
-                              ],
-                              tags: skill_["skilltag"].map((tag: any) => {
-                                    return tag.tagname
-                                          .toLowerCase()
-                                          .replace(" ", "_");
-                              }),
-                        };
+        for (const _ of hero_data.heroskilllist) {
+            for (const skill_ of _.skilllist) {
+                let skill = hero["skills"].find(
+                    (s: any) =>
+                        s.id === skill_.skillid && s.name === skill_.skillname
+                ) || {
+                    id: skill_.skillid,
+                    name: skill_.skillname,
+                    description: (() => {
+                        const htmlContent = convertToHTML5(skill_["skilldesc"]);
+                        const $ = cheerio.load(htmlContent);
 
-                        const { cd, type, cost }: any = parseSkills(
-                              skill_["skillcd&cost"]
-                        );
+                        $("br").replaceWith("\n");
 
-                        if (!hero["resource"] && type) hero["resource"] = type;
+                        return $("body").text().trim();
+                    })(),
+                    images: "toadd",
+                    tags: skill_["skilltag"].map((tag: any) => {
+                        return tag.tagname.toLowerCase().replace(" ", "_");
+                    }),
+                };
 
-                        if (!hero["skills"].includes(skill))
-                              hero["skills"].push(skill);
-                  }
+                if (skill.images === "toadd") {
+                    const skillImage = await axios.get(skill_["skillicon"], {
+                        responseType: "arraybuffer",
+                    });
+                    const skillImageBinary = new Binary(
+                        Buffer.from(skillImage.data)
+                    );
+                    const skillImageUrl = await imageRepo.uploadImage(
+                        "heroes/skills/",
+                        skill_.skillid,
+                        skillImageBinary
+                    );
+                    skill.images = [
+                        {
+                            icon: skillImageUrl,
+                            default: true,
+                        },
+                    ];
+                }
+
+                const { cd, type, cost }: any = parseSkills(
+                    skill_["skillcd&cost"]
+                );
+
+                if (!hero["resource"] && type) hero["resource"] = type;
+
+                if (!hero["skills"].includes(skill)) hero["skills"].push(skill);
             }
+        }
 
-            heroRepo.upsert(hero);
-      }
+        heroRepo.upsert(hero);
+    }
 }

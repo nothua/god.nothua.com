@@ -16,13 +16,13 @@ block content
                 button.flex.items-center.justify-between.bg-white.px-4.py-2.text-gray-900.border.w-full.border-gray-300.rounded(@click="isFilterDropdownOpen = !isFilterDropdownOpen" class="lg:w-52 md:w-40 dark:bg-gray-800 dark:border-gray-700 dark:text-white")
                     span.text-sm.font-medium Types
                     svg(:class="{ 'rotate-180': isFilterDropdownOpen }"
-                      class="w-4 h-4 transition-transform duration-200"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke-width="1.5"
-                      stroke="currentColor")
-                      path(stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5")
+                        class="w-4 h-4 transition-transform duration-200"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="1.5"
+                        stroke="currentColor")
+                        path(stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5")
                 .absolute.z-10.mt-2.bg-white.border.border-gray-300.rounded.shadow-lg.w-full(x-show="isFilterDropdownOpen" @click.away="isFilterDropdownOpen=false" class="lg:w-52 md:w-40 dark:bg-gray-800 dark:border-gray-700")
                     header.flex.items-center.justify-between.px-4.py-3.border-b.border-gray-200
                         span.text-sm.text-gray-700( x-text="`${typeFilters.length} Selected`" class="dark:text-white")
@@ -122,18 +122,18 @@ block scripts
                 },
 
                 async loadHeroes(){
-                    const preloader = document.getElementById("preloader")
-                    preloader.classList.remove("hidden")
+                    showLoading()
 
-                    try{
-                        const response = await axios.get("/dash/heroes/list", {})
-                        this.heroes = response.data
-                    }catch(ex){
-                        this.heroes = []
-                    }
+                    const [error, response] = await axios.get[Symbol.result]("/dash/heroes/list", {})
+
+                    hideLoading()
+
+                    if(error)
+                        return showAlert("error", "Something happened. Please try again")
+
+                    this.heroes = response.data
 
                     this.filteredHeroes = this.heroes
-                    preloader.classList.add("hidden")
                     this.renderHeroes()
                 },
 
@@ -151,12 +151,12 @@ block scripts
                 toggleFilter(typeValue) {
                     if(typeValue != "none")
                         if (this.typeFilters.includes(typeValue)) {
-                                this.typeFilters = this.typeFilters.filter(value => value !== typeValue);
+                            this.typeFilters = this.typeFilters.filter(value => value !== typeValue);
                         } else {
-                                if(this.typeFilters.length >= 2)
-                                    showAlert("error", "Can only select 2 roles")
-                                else 
-                                    this.typeFilters.push(typeValue);
+                            if(this.typeFilters.length >= 2)
+                                showAlert("error", "Can only select 2 roles")
+                            else 
+                                this.typeFilters.push(typeValue);
                         }
                     else
                         this.typeFilters = []
@@ -181,7 +181,7 @@ block scripts
                             else if(this.typeFilters.length == 1)
                                 if(hero.role.primary == this.typeFilters[0] || hero.role.secondary == this.typeFilters[0])
                                     _filter = true
-                            
+
                             return _filter
                         }
 

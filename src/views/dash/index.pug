@@ -1,4 +1,118 @@
 extends _layout
 
 block content
-block scripts
+    section.container.mx-auto(x-data="statistics")
+        div(class="sm:flex sm:items-center sm:justify-between")
+            div
+                .flex.items-center.gap-x-3
+                    h2.text-lg.font-medium.text-gray-800(class="dark:text-white") Statistics
+
+                div.gap-x-4.flex
+                    div
+                        input(
+                            type="text"
+                            class="input input-bordered w-80 mt-4"
+                            placeholder="Select Hero"
+                            x-model="heroDropdown.search"
+                            @focus="heroDropdown.isOpen = true"
+                            @click.away="heroDropdown.isOpen = false"
+                        )
+                        div(
+                            x-show="heroDropdown.isOpen" 
+                            class="absolute z-50 w-80 border border-base-200 rounded-lg shadow-lg mt-1 max-h-52 overflow-y-auto"
+                        )
+                            template(x-for="hero in heroes.filter(t => t.name.toLowerCase().includes(heroDropdown.search.toLowerCase()))" :key="hero._id")
+                                div(
+                                    @click="heroDropdown.value = hero.id; heroDropdown.search = hero.name; heroDropdown.isOpen = false"
+                                    class="hover:bg-base-100 cursor-pointer flex flex-justify-between gap-x-2 p-2"
+                                )
+                                    img(:src="hero.thumbnail").w-8
+                                    span(x-text="hero.name")
+                    div
+                        input(
+                            type="text"
+                            class="input input-bordered w-52 mt-4"
+                            placeholder="Select Rank"
+                            x-model="rankDropdown.search"
+                            @focus="rankDropdown.isOpen = true"
+                            @click.away="rankDropdown.isOpen = false"
+                        )
+                        div(
+                            x-show="rankDropdown.isOpen" 
+                            class="absolute z-50 w-52 border border-base-200 rounded-lg shadow-lg mt-1 max-h-52 overflow-y-auto"
+                        )
+                            template(x-for="rank in ranks.filter(t => t.name.toLowerCase().includes(rankDropdown.search.toLowerCase()))" :key="rank.value")
+                                div(
+                                    @click="rankDropdown.value = rank.value; rankDropdown.search = rank.name; rankDropdown.isOpen = false"
+                                    class="hover:bg-base-100 cursor-pointer flex flex-justify-between gap-x-2 p-2"
+                                )
+                                    span(x-text="rank.name").ms-2
+                    div
+                        input(
+                            type="text"
+                            class="input input-bordered w-80 mt-4"
+                            placeholder="Select Range"
+                            x-model="rangeDropdown.search"
+                            @focus="rangeDropdown.isOpen = true"
+                            @click.away="rangeDropdown.isOpen = false"
+                        )
+                        div(
+                            x-show="rangeDropdown.isOpen" 
+                            class="absolute z-50 w-80 border border-base-200 rounded-lg shadow-lg mt-1 max-h-52 overflow-y-auto"
+                        )
+                            template(x-for="range in ranges.filter(t => t.name.toLowerCase().includes(rangeDropdown.search.toLowerCase()))" :key="range.value")
+                                div(
+                                    @click="rangeDropdown.value = range.value; rangeDropdown.search = range.name; rangeDropdown.isOpen = false"
+                                    class="hover:bg-base-100 cursor-pointer flex flex-justify-between gap-x-2 p-2"
+                                )
+                                    span(x-text="range.name").ms-2
+block scripts 
+    script.
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('statistics', () => ({
+                heroes: [],
+                ranks: [],
+                ranges: [],
+                heroDropdown: {
+                    search: "",
+                    value: "",
+                    isOpen: false
+                },
+                rankDropdown: {
+                    search: "",
+                    value: "",
+                    isOpen: false
+                },
+                rangeDropdown: {
+                    search: "",
+                    value: "",
+                    isOpen: false
+                },
+                init() {
+                    showLoading()
+                    this.fetchMisc()
+                    this.fetchHeroes()
+                    hideLoading()
+                },
+                async fetchMisc(){
+                    const [error, response] = await axios.post[Symbol.result]("/api/misc", {
+                        requestData: "ranks,ranges"
+                    })
+                    
+                    if(error)
+                        return showAlert("error", "Something happened. Please try again")
+
+                    this.ranks = response.data.ranks
+                    this.ranges = response.data.ranges
+                },
+
+                async fetchHeroes(){
+                    const [error, response] = await axios.get[Symbol.result]("/dash/heroes/list", {})
+
+                    if(error)
+                        return showAlert("error", "Something happened. Please try again")
+
+                    this.heroes = response.data
+                },
+            }))
+        })

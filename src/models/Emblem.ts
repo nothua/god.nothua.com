@@ -1,15 +1,15 @@
 import { Document, Schema, model } from "mongoose";
 
 const schema = new Schema({
-      name: String,
-      image: String,
-      emote: String,
-      attributes: [
-            {
-                  name: String,
-                  value: String,
-            },
-      ],
+    _id: { type: Number, required: true },
+    name: String,
+    image: String,
+    attributes: [
+        {
+            name: String,
+            value: String,
+        },
+    ],
 });
 
 export default model<Document>("Emblem", schema);

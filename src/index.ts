@@ -1,9 +1,9 @@
-require("dotenv").config({ path: `.env.development` });
+require("dotenv").config({ path: `.env` });
 import "reflect-metadata";
 import express, {
-      type NextFunction,
-      type Request,
-      type Response,
+    type NextFunction,
+    type Request,
+    type Response,
 } from "express";
 import cookieParser from "cookie-parser";
 import Mongoose from "mongoose";
@@ -31,24 +31,22 @@ import apiRouter from "./routes/APIRoute";
 app.use("/api", apiRouter);
 
 app.use((req, res, next) => {
-      res.render("_error", {
-            title: "404",
-            message: "Page not found",
-      });
+    res.render("_error", {
+        title: "404",
+        message: "Page not found",
+    });
 });
 
-console.log(process.env.MONGO_URI);
-
 try {
-      Mongoose.connect(process.env.MONGO_URI || "");
-      console.log("Mongodb connected");
-      registerServicesFromDirectory();
+    Mongoose.connect(process.env.MONGO_URI || "");
+    console.log("Mongodb connected");
+    registerServicesFromDirectory();
 } catch (e) {
-      console.log(e);
+    console.log(e);
 }
 
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-      console.log(`Server started on PORT ${PORT}`);
+    console.log(`Server started on PORT ${PORT}`);
 });

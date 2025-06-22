@@ -129,3 +129,14 @@ Promise.prototype[Symbol.result] = async function () {
         return [error || new Error("Thrown error is falsy")];
     }
 };
+
+function copyText(text) {
+    navigator.clipboard
+        .writeText(text)
+        .then(() => {
+            showAlert("success", "Copied to clipboard");
+        })
+        .catch(() => {
+            showAlert("error", "Failed to copy to clipboard");
+        });
+}

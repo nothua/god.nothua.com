@@ -30,6 +30,7 @@ class BaseRepository<T extends Document> {
     }
 
     async upsert(data: Partial<T> & { _id?: string }): Promise<T | null> {
+        if (!data._id) data._id = data.id;
         return this.model.findOneAndUpdate({ _id: data._id }, data, {
             upsert: true,
             new: true,

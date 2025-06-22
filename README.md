@@ -1,15 +1,5 @@
-# modutils.nothua.com
+> Text123123123123123 @12670 @skill2 
 
-To install dependencies:
 
-```bash
-bun install
-```
-
-To run:
-
-```bash
-bun run index.ts
-```
-
-This project was created using `bun init` in bun v1.1.26. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
+emote will be @id 
+id can be emblem, hero, talent, anything 

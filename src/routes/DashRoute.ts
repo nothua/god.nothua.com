@@ -4,6 +4,9 @@ import HeroRepository from "../repositories/HeroRepository";
 import { authMiddleware } from "../middlewares/auth";
 import type UserRepository from "../repositories/UserRepository";
 import {
+    AttackType,
+    HeroSpeciality,
+    Position,
     Resource,
     RoleType,
     SkillTags,
@@ -70,7 +73,7 @@ const routes = async (req: Request) => {
     });
 };
 
-// List Views
+// Views
 
 router.get("/", async (req: Request, res: Response) => {
     res.render("dash/index", {
@@ -94,6 +97,19 @@ router.get(`/heroes`, async (req: Request, res: Response) => {
     });
 });
 
+router.get(`/heroes/edit/:id`, async (req: Request, res: Response) => {
+    const { id } = req.params;
+
+    res.render("dash/heroes/edit", {
+        routes: await routes(req),
+        roles: RoleType,
+        id,
+        active: "Heroes",
+    });
+});
+
+// Get by ID
+
 router.get(`/hero/:id`, async (req: Request, res: Response) => {
     const { id } = req.params;
 
@@ -102,25 +118,6 @@ router.get(`/hero/:id`, async (req: Request, res: Response) => {
     const data = JSON.parse(JSON.stringify(hero));
 
     res.json(data);
-});
-
-router.get(`/heroes/edit/:id`, async (req: Request, res: Response) => {
-    const { id } = req.params;
-
-    const hero = await heroRepo().get(id);
-
-    const data = JSON.parse(JSON.stringify(hero));
-
-    res.render("dash/heroes/edit", {
-        routes: await routes(req),
-        roles: RoleType,
-        skillTags: SkillTags,
-        resources: Resource,
-        skinRarity: SkinRarity,
-        skillType: SkillType,
-        hero: data,
-        active: "Heroes",
-    });
 });
 
 //Fetch List

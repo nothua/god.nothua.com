@@ -1,0 +1,298 @@
+doctype html
+html(lang="en")
+    head
+        title Hero Winrates | Guide of Dawn
+        link(rel='stylesheet' href='/lib/fontawesome/css/all.min.css')
+        link(rel="stylesheet" href="/css/tailwind.css")
+    body(x-data="heroStatsData()" x-init="init()" class="bg-gray-900 text-white")
+        div(class="container mx-auto px-4 py-8")
+            // Header
+            h1(class="text-3xl font-bold mb-6") Hero Performance Stats
+
+            // Filters and Search
+            div(class="flex space-x-4 mb-6")
+                // Rank Selector
+                select(
+                    x-model="rank" 
+                    class="bg-gray-800 text-white p-2 rounded"
+                )
+                    option(value="All") All Ranks
+                    option(value="Epic") Epic
+                    option(value="Legend") Legend
+                    option(value="Mythic") Mythic
+                    option(value="MythicHonor") Mythic Honor
+                    option(value="MythicGlory") Mythic Glory
+
+                // Date Range Selector
+                select(
+                    x-model="dateRange" 
+                    class="bg-gray-800 text-white p-2 rounded"
+                )
+                    option(value="1") Last Day
+                    option(value="3") Last 3 Days
+                    option(value="7") Last 7 Days
+                    option(value="14") Last 14 Days
+                    option(value="30") Last 30 Days
+                    option(value="90") Last 90 Days
+
+                // Fetch Button
+                button(
+                    @click="fetchHeroStats()" 
+                    class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                ) Fetch Stats
+
+                p(x-text="`Last Updated at: ${latestDate.toLocaleString()}`" class="ml-4 mt-2")
+
+            // Hero Stats Table
+            div(class="bg-gray-800 rounded-lg overflow-hidden")
+                table(class="w-full text-left")
+                    thead(class="bg-gray-700")
+                        tr
+                            th(
+                                class="p-3 cursor-pointer" 
+                                @click="sortBy('id')"
+                            ) 
+                                | Hero 
+                                i(
+                                    class="fas ml-2" 
+                                    :class="sortKey === 'id' ? (sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'"
+                                )
+                            th(
+                                class="p-3 cursor-pointer" 
+                                @click="sortBy('winrate')"
+                            ) 
+                                | Winrate 
+                                i(
+                                    class="fas ml-2" 
+                                    :class="sortKey === 'winrate' ? (sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'"
+                                )
+                            th(
+                                class="p-3 cursor-pointer" 
+                                @click="sortBy('pickrate')"
+                            ) 
+                                | Pickrate 
+                                i(
+                                    class="fas ml-2" 
+                                    :class="sortKey === 'pickrate' ? (sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'"
+                                )
+                            th(
+                                class="p-3 cursor-pointer" 
+                                @click="sortBy('banrate')"
+                            ) 
+                                | Banrate 
+                                i(
+                                    class="fas ml-2" 
+                                    :class="sortKey === 'banrate' ? (sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'"
+                                )
+                            th(class="p-3") Actions
+
+                    tbody
+                        template(x-for="hero in sortedHeroes")
+                            tr(class="border-b border-gray-700 hover:bg-gray-700")
+                                td(class="p-3 flex items-center")
+                                    img(
+                                        :src="hero.avatar" 
+                                        class="w-10 h-10 rounded-full mr-3"
+                                    )
+                                    span(x-text="hero.name")
+                                td(x-text="`${hero.winrate}%`")
+                                td(x-text="`${hero.pickrate}%`")
+                                td(x-text="`${hero.banrate}%`")
+                                td(class="p-3 flex space-x-2")
+                                    button(
+                                        @click="showHeroTrend(hero)"
+                                        class="bg-green-500 text-white px-2 py-1 rounded text-sm"
+                                    ) Trends
+                                    button(
+                                        @click="compareHero(hero)"
+                                        class="bg-blue-500 text-white px-2 py-1 rounded text-sm"
+                                    ) Compare
+
+            // Hero Trend Modal
+            div(
+                x-show="selectedHeroTrend" 
+                x-cloak 
+                class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
+            )
+                div(class="bg-gray-800 p-6 rounded-lg w-3/4")
+                    h2(
+                        class="text-2xl mb-4" 
+                        x-text="selectedHeroTrend ? selectedHeroTrend.name + ' Trends' : ''"
+                    )
+                    // Trend Details
+                    div(class="grid grid-cols-3 gap-4")
+                        div(class="bg-gray-700 p-4 rounded")
+                            h3(class="font-bold mb-2") Recent Winrate
+                            p(x-text="selectedHeroTrend ? `${selectedHeroTrend.recentWinrate}%` : '-'")
+                        div(class="bg-gray-700 p-4 rounded")
+                            h3(class="font-bold mb-2") Recent Pickrate
+                            p(x-text="selectedHeroTrend ? `${selectedHeroTrend.recentPickrate}%` : '-'")
+                        div(class="bg-gray-700 p-4 rounded")
+                            h3(class="font-bold mb-2") Recent Banrate
+                            p(x-text="selectedHeroTrend ? `${selectedHeroTrend.recentBanrate}%` : '-'")
+                    
+                    button(
+                        @click="selectedHeroTrend = null"
+                        class="mt-4 bg-red-600 text-white px-4 py-2 rounded"
+                    ) Close
+
+            // Compare Modal
+            div(
+                x-show="comparedHero" 
+                x-cloak 
+                class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
+            )
+                div(class="bg-gray-800 p-6 rounded-lg w-3/4")
+                    h2(
+                        class="text-2xl mb-4" 
+                        x-text="comparedHero ? 'Compare ' + comparedHero.name : ''"
+                    )
+                    // Comparison Filters
+                    div(class="flex space-x-4 mb-4")
+                        select(x-model="compareRank" class="bg-gray-700 text-white p-2 rounded")
+                            option(value="All") All Ranks
+                            option(value="Epic") Epic
+                            option(value="Legend") Legend
+                            option(value="Mythic") Mythic
+                        
+                        select(x-model="compareDateRange" class="bg-gray-700 text-white p-2 rounded")
+                            option(value="1") Last Day
+                            option(value="3") Last 3 Days
+                            option(value="7") Last 7 Days
+                            option(value="14") Last 14 Days
+                            option(value="30") Last 30 Days
+                            option(value="90") Last 90 Days
+                        
+                        button(
+                            @click="performComparison()"
+                            class="bg-blue-600 text-white px-4 py-2 rounded"
+                        ) Compare
+
+                    // Comparison Results
+                    div(x-show="comparisonResults" class="grid grid-cols-2 gap-4")
+                        div
+                            h3(class="font-bold mb-2") Original Stats
+                            p(x-text="`Winrate: ${comparedHero ? comparedHero.winrate : '-'}%`")
+                            p(x-text="`Pickrate: ${comparedHero ? comparedHero.pickrate : '-'}%`")
+                            p(x-text="`Banrate: ${comparedHero ? comparedHero.banrate : '-'}%`")
+                        div
+                            h3(class="font-bold mb-2") Compared Stats
+                            p(x-text="`Winrate: ${comparisonResults ? comparisonResults.winrate : '-'}%`")
+                            p(x-text="`Pickrate: ${comparisonResults ? comparisonResults.pickrate : '-'}%`")
+                            p(x-text="`Banrate: ${comparisonResults ? comparisonResults.banrate : '-'}%`")
+
+                    button(
+                        @click="comparedHero = null"
+                        class="mt-4 bg-red-600 text-white px-4 py-2 rounded"
+                    ) Close
+
+        script(src="/js/alpine.js" defer)
+        script(src="https://cdn.jsdelivr.net/npm/chart.js")
+        script.
+            function heroStatsData() {
+                return {
+                    heroStats: [],
+                    rank: 'All',
+                    dateRange: '7',
+                    sortKey: 'winrate',
+                    sortDirection: 'desc',
+                    selectedHeroTrend: null,
+                    comparedHero: null,
+                    compareRank: 'All',
+                    compareDateRange: '7',
+                    comparisonResults: null,
+                    latestDate: null,
+
+                    init() {
+                        this.fetchHeroStats();
+                        this.findLatestStat();
+                    },
+
+                    async findLatestStat(){
+                        try {
+                            const response = await fetch('/api/hero-stats/latest', {
+                                method: 'GET',
+                                headers: { 'Content-Type': 'application/json' },
+                            });
+                            const latestStat = await response.json();
+                            this.latestDate = new Date(latestStat.date);
+                        } catch (error) {
+                            console.error('Failed to fetch latest stat:', error);
+                        }
+                    },
+
+                    async fetchHeroStats() {
+                        try {
+                            const response = await fetch('/api/hero-stats', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    rank: this.rank,
+                                    dateRange: this.dateRange
+                                })
+                            });
+                            this.heroStats = await response.json();
+                        } catch (error) {
+                            console.error('Failed to fetch hero stats:', error);
+                        }
+                    },
+
+                    get sortedHeroes() {
+                        return [...this.heroStats].sort((a, b) => {
+                            const modifier = this.sortDirection === 'asc' ? 1 : -1;
+                            return modifier * (a[this.sortKey] - b[this.sortKey]);
+                        });
+                    },
+
+                    sortBy(key) {
+                        if (this.sortKey === key) {
+                            this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+                        } else {
+                            this.sortKey = key;
+                            this.sortDirection = 'desc';
+                        }
+                    },
+
+                    async showHeroTrend(hero) {
+                        try {
+                            const response = await fetch(`/api/hero-trend/${hero.id}`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    rank: this.rank,
+                                    dateRange: this.dateRange
+                                })
+                            });
+                            const trendData = await response.json();
+                            this.selectedHeroTrend = {
+                                ...hero,
+                                ...trendData
+                            };
+                        } catch (error) {
+                            console.error('Failed to fetch hero trend:', error);
+                        }
+                    },
+
+                    async compareHero(hero) {
+                        this.comparedHero = hero;
+                    },
+
+                    async performComparison() {
+                        try {
+                            const response = await fetch(`/api/hero-compare/${this.comparedHero.id}`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    originalRank: this.rank,
+                                    originalDateRange: this.dateRange,
+                                    compareRank: this.compareRank,
+                                    compareDateRange: this.compareDateRange
+                                })
+                            });
+                            this.comparisonResults = await response.json();
+                        } catch (error) {
+                            console.error('Failed to compare hero:', error);
+                        }
+                    }
+                };
+            }

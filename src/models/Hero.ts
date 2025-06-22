@@ -1,3 +1,4 @@
+import { ObjectId } from "mongodb";
 import { Document, Schema, model } from "mongoose";
 
 export enum Resource {
@@ -67,16 +68,90 @@ export enum SkinRarity {
     "Legend" = "legend",
 }
 
+export enum HeroSpeciality {
+    "Regen" = "regen",
+    "Control" = "control",
+    "Finisher" = "finisher",
+    "Charge" = "charge",
+    "Push" = "push",
+    "DPS" = "dps",
+    "Burst" = "burst",
+    "Poke" = "poke",
+    "Initiator" = "initiator",
+    "Support" = "support",
+    "Guard" = "guard",
+    "Chase" = "chase",
+    "Lockdown" = "lockdown",
+}
+
+export enum AttackType {
+    "Melee" = "melee",
+    "Ranged" = "ranged",
+    "Hybrid" = "hybrid",
+}
+
+const GuideSchema = new Schema(
+    {
+        position: { type: String, enum: Position, required: true },
+        strengths: [{ type: String, required: true }],
+        weaknesses: [{ type: String, required: true }],
+        gameplans: [
+            {
+                title: { type: String, required: true },
+                shortDescription: { type: String, required: true },
+                description: { type: String, required: true },
+            },
+        ],
+        powerspikes: [
+            {
+                title: { type: String, required: true },
+                shortDescription: { type: String, required: true },
+                description: { type: String, required: true },
+            },
+        ],
+    },
+    { _id: false }
+);
+
 const schema = new Schema({
     _id: { type: Number, required: true },
     name: { type: String, required: true },
     thumbnail: { type: String, required: true },
     painting: { type: String, required: true },
-    story: { type: String, required: true },
     resource: {
         type: String,
         enum: Object.values(Resource),
         default: Resource.None,
+    },
+    role: {
+        primary: {
+            type: String,
+            enum: RoleType,
+            required: true,
+        },
+        secondary: {
+            type: String,
+            enum: RoleType,
+            default: null,
+        },
+    },
+    speciality: {
+        primary: {
+            type: String,
+            enum: HeroSpeciality,
+            required: true,
+            default: null,
+        },
+        secondary: {
+            type: String,
+            enum: HeroSpeciality,
+            default: null,
+        },
+    },
+    attackType: {
+        type: String,
+        enum: AttackType,
+        required: true,
     },
     skins: [
         {
@@ -90,20 +165,12 @@ const schema = new Schema({
                 enum: Object.values(SkinRarity),
                 default: SkinRarity.Common,
             },
+            createdOn: {
+                type: Date,
+                default: Date.now,
+            },
         },
     ],
-    role: {
-        primary: {
-            type: String,
-            enum: RoleType,
-            required: true,
-        },
-        secondary: {
-            type: String,
-            enum: RoleType,
-            default: null,
-        },
-    },
     skills: [
         {
             id: {
@@ -124,20 +191,32 @@ const schema = new Schema({
                     value: String,
                 },
             ],
-            level_priority: [Number],
             tags: [
                 {
                     type: String,
                     enum: SkillTags,
                 },
             ],
-            type: {
-                type: String,
-                enum: SkillType,
-            },
             video: String,
-            replace: {
-                type: String,
+            order: {
+                type: Number,
+                enum: [0, 1, 2, 3, 4, 5],
+            },
+            unique: {
+                type: Boolean,
+                default: true,
+            },
+        },
+    ],
+    skills_priority: [
+        {
+            level: {
+                type: Number,
+                enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+            },
+            skill_order: {
+                type: Number,
+                enum: [0, 1, 2, 3, 4],
             },
         },
     ],
@@ -149,14 +228,6 @@ const schema = new Schema({
                 required: true,
             },
             items: [
-                {
-                    item: {
-                        type: Number,
-                        ref: "Item",
-                    },
-                },
-            ],
-            pathing: [
                 {
                     item: {
                         type: Number,
@@ -188,12 +259,6 @@ const schema = new Schema({
                     },
                 },
             ],
-        },
-    ],
-    gameplan: [
-        {
-            title: String,
-            description: String,
         },
     ],
     attributes: {
@@ -326,6 +391,19 @@ const schema = new Schema({
             required: true,
             default: 0,
         },
+    },
+    description: { type: String, required: true },
+    guides: {
+        exp: GuideSchema,
+        mid: GuideSchema,
+        gold: GuideSchema,
+        jungle: GuideSchema,
+        roam: GuideSchema,
+    },
+    lastUpdated: { type: Date, default: Date.now },
+    updatedBy: {
+        type: ObjectId,
+        ref: "User",
     },
 });
 

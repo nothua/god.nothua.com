@@ -185,6 +185,8 @@ export async function updateDailyWinrate(date: any = null) {
                 console.error("Error creating hero:", ex);
             }
         }
+
+        sendWebhookNotification("Daily winrate updated successfully");
     } catch (ex) {
         sendWebhookNotification("Error updating daily winrate", ex);
     }

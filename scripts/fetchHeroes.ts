@@ -42,7 +42,7 @@ export async function getHeroesCount() {
         )
     });
 
-    return (await heroes.json()).data.data.total;
+    return (await heroes.json()).data.total;
 }
 
 export async function fetchHeroes() {
@@ -74,7 +74,7 @@ export async function fetchHeroes() {
         )
     });
 
-    const heroes_res = (await heroes_req.json()).data.data.records;
+    const heroes_res = (await heroes_req.json()).data.records;
 
     return heroes_res;
 }

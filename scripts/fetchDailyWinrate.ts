@@ -35,11 +35,11 @@ async function fetchData(url: string, rank: string, date: any = null) {
                     value: RANKS[rank as RankKey],
                 },
                 { field: "match_type", operator: "eq", value: "0" },
-                {
-                    field: "date",
-                    operator: "lte",
-                    value: date ? date.getTime() : null,
-                },
+                // {
+                //     field: "date",
+                //     operator: "lte",
+                //     value: date ? date.getTime() : null,
+                // },
             ],
             sorts: [
                 {
@@ -74,22 +74,20 @@ export async function fetchDailyWinrate(date: any) {
     };
 
     for (const rank in RANKS) {
-        console.log("first");
         const winrate_and_counters_request = await fetchData(
             HERO_WINRATE_AND_COUNTERS(),
             rank,
             date
         );
-        console.log("second");
         const hero_compatibility_request = await fetchData(
             HERO_COMPATIBILITY(),
             rank
         );
 
         const winrate_and_counters =
-            winrate_and_counters_request.data.data.records;
+            winrate_and_counters_request.data.records;
         const hero_compatibilities =
-            hero_compatibility_request.data.data.records;
+            hero_compatibility_request.data.records;
 
         winrate_and_counters.forEach((hero_data: any, i: any) => {
             const hero_compatibility = hero_compatibilities[i].data;
@@ -194,7 +192,7 @@ export async function updateDailyWinrate(date: any = null) {
         sendWebhookNotification("Daily winrate updated successfully");
     } catch (ex: any) {
         console.log("Error updating daily winrate:", ex.message);
-        // sendWebhookNotification("Error updating daily winrate", ex);
+        sendWebhookNotification("Error updating daily winrate", ex);
     }
 }
 
@@ -208,11 +206,14 @@ async function sendWebhookNotification(message: string, error?: any) {
     }
 
     try {
-        await axios.post(DISCORD_WEBHOOK_URL, {
-            content: `🚨 **Daily Winrate Update Error** 🚨\n\n**Message:** ${message}\n**Error Details:** \`\`\`${
-                error?.message || "Unknown error"
-            }\`\`\``,
-            username: "Moomers",
+        await fetch(DISCORD_WEBHOOK_URL, {
+            method: "POST",
+            body: JSON.stringify({
+                content: `🚨 **Daily Winrate Update Error** 🚨\n\n**Message:** ${message}\n**Error Details:** \`\`\`${
+                    error?.message || "Unknown error"
+                }\`\`\``,
+                username: "Moomers",
+            })
         });
     } catch (webhookError) {
         console.error("Failed to send webhook notification:", webhookError);

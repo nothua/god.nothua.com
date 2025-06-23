@@ -44,11 +44,14 @@ router.get("/fetchDailyWinrate", async (req: Request, res: Response) => {
     });
 
     if (req.query.date) {
-        updateDailyWinrate(new Date(req.query.date.toString()));
+        await updateDailyWinrate(new Date(req.query.date.toString()));
         return;
     }
 
-    updateDailyWinrate();
+    await updateDailyWinrate();
+
+
+    res.json({message: "Updated", time: Date.now()});
 });
 
 router.post("/fetchHeroes", async (req: Request, res: Response) => {

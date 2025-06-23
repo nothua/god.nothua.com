@@ -24,39 +24,42 @@ const RANKS: { [key in RankKey]: string } = {
 const serviceLocator = getServiceLocator();
 
 async function fetchData(url: string, rank: string, date: any = null) {
-    return await axios.post(url, {
-        pageSize: await getHeroesCount(),
-        filters: [
-            {
-                field: "bigrank",
-                operator: "eq",
-                value: RANKS[rank as RankKey],
-            },
-            { field: "match_type", operator: "eq", value: "0" },
-            {
-                field: "date",
-                operator: "lte",
-                value: date ? date.getTime() : null,
-            },
-        ],
-        sorts: [
-            {
-                data: { field: "main_heroid", order: "asc" },
-                type: "sequence",
-            },
-        ],
-        pageIndex: 1,
-        fields: [
-            "main_heroid",
-            "main_hero_appearance_rate",
-            "main_hero_ban_rate",
-            "main_hero_win_rate",
-            "data.sub_hero.heroid",
-            "data.sub_hero.increase_win_rate",
-            "data.sub_hero_last.heroid",
-            "data.sub_hero_last.increase_win_rate",
-        ],
-    });
+    return await (await fetch(url, {
+        method: "POST",
+        body: JSON.stringify({
+            pageSize: await getHeroesCount(),
+            filters: [
+                {
+                    field: "bigrank",
+                    operator: "eq",
+                    value: RANKS[rank as RankKey],
+                },
+                { field: "match_type", operator: "eq", value: "0" },
+                {
+                    field: "date",
+                    operator: "lte",
+                    value: date ? date.getTime() : null,
+                },
+            ],
+            sorts: [
+                {
+                    data: { field: "main_heroid", order: "asc" },
+                    type: "sequence",
+                },
+            ],
+            pageIndex: 1,
+            fields: [
+                "main_heroid",
+                "main_hero_appearance_rate",
+                "main_hero_ban_rate",
+                "main_hero_win_rate",
+                "data.sub_hero.heroid",
+                "data.sub_hero.increase_win_rate",
+                "data.sub_hero_last.heroid",
+                "data.sub_hero_last.increase_win_rate",
+            ],
+        }),
+    })).json();
 }
 
 export async function fetchDailyWinrate(date: any) {
@@ -71,11 +74,13 @@ export async function fetchDailyWinrate(date: any) {
     };
 
     for (const rank in RANKS) {
+        console.log("first");
         const winrate_and_counters_request = await fetchData(
             HERO_WINRATE_AND_COUNTERS(),
             rank,
             date
         );
+        console.log("second");
         const hero_compatibility_request = await fetchData(
             HERO_COMPATIBILITY(),
             rank
@@ -187,8 +192,9 @@ export async function updateDailyWinrate(date: any = null) {
         }
 
         sendWebhookNotification("Daily winrate updated successfully");
-    } catch (ex) {
-        sendWebhookNotification("Error updating daily winrate", ex);
+    } catch (ex: any) {
+        console.log("Error updating daily winrate:", ex.message);
+        // sendWebhookNotification("Error updating daily winrate", ex);
     }
 }
 

@@ -7,42 +7,74 @@ import { Binary } from "mongodb";
 import * as cheerio from "cheerio";
 
 export async function getHeroesCount() {
-    const heroes = await axios.post(HEROES(), {
-        pageSize: 1,
-        filters: [],
-        sorts: [],
-        pageIndex: 1,
-        fields: ["main_heroid"],
+    // const heroes = await axios.post(HEROES(), {
+    //     pageSize: 1,
+    //     filters: [],
+    //     sorts: [],
+    //     pageIndex: 1,
+    //     fields: ["main_heroid"],
+    // },  {
+    //     headers: {
+    //       "accept": "application/json, text/plain, */*",
+    //       "content-type": "application/json;charset=UTF-8",
+    //       "origin": "https://m.mobilelegends.com",
+    //       "referer": "https://m.mobilelegends.com/",
+    //       "sec-ch-ua": '"Chromium";v="136", "Google Chrome";v="136", "Not.A/Brand";v="99"',
+    //       "sec-ch-ua-mobile": "?0",
+    //       "sec-ch-ua-platform": '"Windows"',
+    //       "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
+    //       "x-appid": "2669606",
+    //       "x-actid": "2669607",
+    //       "x-lang": "en",
+    //     }
+    // });
+
+    const heroes = await fetch(HEROES(), {
+        method: "POST"  ,
+        body: JSON.stringify(
+            {
+                pageSize: 1,
+                filters: [],
+                sorts: [],
+                pageIndex: 1,
+                fields: ["main_heroid"],
+            }
+        )
     });
 
-    return heroes.data.data.total;
+    return (await heroes.json()).data.data.total;
 }
 
 export async function fetchHeroes() {
-    const heroes_req = await axios.post(HEROES(), {
-        pageSize: await getHeroesCount(),
-        sorts: [
+    const heroes_req = await fetch(HEROES(), {
+        method: "POST"  ,
+        body: JSON.stringify(
             {
-                data: { field: "hero_id", order: "asc" },
-                type: "sequence",
-            },
-        ],
-        pageIndex: 1,
-        fields: [
-            "hero_id",
-            "hero.data.name",
-            "hero.data.smallmap",
-            "hero.data.heroskilllist",
-            "hero.data.painting",
-            "hero.data.head",
-            "hero.data.sortlabel",
-            "hero.data.head",
-            "hero.data.story",
-        ],
-        object: [],
+                pageSize: await getHeroesCount(),
+                sorts: [
+                    {
+                        data: { field: "hero_id", order: "asc" },
+                        type: "sequence",
+                    },
+                ],
+                pageIndex: 1,
+                fields: [
+                    "hero_id",
+                    "hero.data.name",
+                    "hero.data.smallmap",
+                    "hero.data.heroskilllist",
+                    "hero.data.painting",
+                    "hero.data.head",
+                    "hero.data.sortlabel",
+                    "hero.data.head",
+                    "hero.data.story",
+                ],
+                object: [],
+            }
+        )
     });
 
-    const heroes_res = heroes_req.data.data.records;
+    const heroes_res = (await heroes_req.json()).data.data.records;
 
     return heroes_res;
 }

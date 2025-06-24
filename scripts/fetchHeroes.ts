@@ -48,9 +48,6 @@ export async function getHeroesCount() {
         ],
     });
 
-    console.log(heroes);
-    console.log(heroes.body);
-
     return (await heroes.json()).data.total;
 }
 

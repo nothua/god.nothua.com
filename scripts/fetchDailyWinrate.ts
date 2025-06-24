@@ -187,17 +187,17 @@ export async function fetchDailyWinrate(date: any) {
 export async function updateDailyWinrate(date: any = null) {
     try {
         const heroes = await fetchDailyWinrate(date);
-        // const statRepo =
-        //     serviceLocator.resolve<StatRepository>("StatRepository");
+        const statRepo =
+            serviceLocator.resolve<StatRepository>("StatRepository");
 
-        // for (const hero of heroes) {
-        //     try {
-        //         await statRepo.create(hero);
-        //         console.log(`Updating hero ${hero.hero} ${hero.date}`);
-        //     } catch (ex) {
-        //         console.error("Error creating hero:", ex);
-        //     }
-        // }
+        for (const hero of heroes) {
+            try {
+                await statRepo.create(hero);
+                console.log(`Updating hero ${hero.hero} ${hero.date}`);
+            } catch (ex) {
+                console.error("Error creating hero:", ex);
+            }
+        }
 
         sendWebhookNotification("Daily winrate updated successfully");
     } catch (ex: any) {
@@ -216,7 +216,6 @@ async function sendWebhookNotification(message: string, error?: any) {
     }
 
     try {
-
         var _msg = ""
         if(error)
             _msg = `🚨 **Error** 🚨\n\n**Message:** ${message}\n**Error Details:** \`\`\`${

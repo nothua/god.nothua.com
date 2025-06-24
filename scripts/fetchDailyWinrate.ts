@@ -24,7 +24,8 @@ const RANKS: { [key in RankKey]: string } = {
 const serviceLocator = getServiceLocator();
 
 async function fetchData(url: string, rank: string, date: any = null) {
-    return await (await fetch(url, {
+
+    const req = await fetch(url, {
         method: "POST",
         body: JSON.stringify({
             pageSize: await getHeroesCount(),
@@ -59,7 +60,12 @@ async function fetchData(url: string, rank: string, date: any = null) {
                 "data.sub_hero_last.increase_win_rate",
             ],
         }),
-    })).json();
+    });
+
+    console.log(req);
+    console.log(await req.json());
+
+    return await req.json();
 }
 
 export async function fetchDailyWinrate(date: any) {

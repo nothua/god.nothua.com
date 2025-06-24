@@ -29,6 +29,15 @@ export async function getHeroesCount() {
     //     }
     // });
 
+    console.log(JSON.stringify(
+            {
+                pageSize: 1,
+                filters: [],
+                sorts: [],
+                pageIndex: 1,
+                fields: ["main_heroid"],
+            }));
+
     const heroes = await fetch(HEROES(), {
         method: "POST"  ,
         body: JSON.stringify(
@@ -41,6 +50,9 @@ export async function getHeroesCount() {
             }
         )
     });
+
+    console.log(heroes);
+    console.log(heroes.body);
 
     return (await heroes.json()).data.total;
 }

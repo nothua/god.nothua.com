@@ -60,10 +60,14 @@ async function fetchData(url: string, rank: string, date: any = null) {
                 "data.sub_hero_last.increase_win_rate",
             ],
         }),
+        headers: [
+            ["Content-Type", "application/json"],
+            [
+                "User-Agent",
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
+            ],
+        ],
     });
-
-    console.log(req);
-    console.log(await req.json());
 
     return await req.json();
 }

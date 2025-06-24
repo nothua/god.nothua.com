@@ -28,16 +28,6 @@ export async function getHeroesCount() {
     //       "x-lang": "en",
     //     }
     // });
-
-    console.log(JSON.stringify(
-            {
-                pageSize: 1,
-                filters: [],
-                sorts: [],
-                pageIndex: 1,
-                fields: ["main_heroid"],
-            }));
-
     const heroes = await fetch(HEROES(), {
         method: "POST"  ,
         body: JSON.stringify(
@@ -48,7 +38,14 @@ export async function getHeroesCount() {
                 pageIndex: 1,
                 fields: ["main_heroid"],
             }
-        )
+        ),
+        headers: [
+            ["Content-Type", "application/json"],
+            [
+                "User-Agent",
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
+            ],
+        ],
     });
 
     console.log(heroes);
@@ -83,7 +80,14 @@ export async function fetchHeroes() {
                 ],
                 object: [],
             }
-        )
+        ),
+        headers: [
+            ["Content-Type", "application/json"],
+            [
+                "User-Agent",
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
+            ],
+        ],
     });
 
     const heroes_res = (await heroes_req.json()).data.records;

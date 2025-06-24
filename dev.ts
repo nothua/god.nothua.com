@@ -7,5 +7,14 @@ import { fetchHeroes, updateHeroes } from "./scripts/fetchHeroes";
 Mongoose.connect(process.env.MONGO_URI || "");
 console.log("Mongodb connected");
 registerServicesFromDirectory().then(() => {
-  updateHeroes();
+  createUser({
+    name: "admin",
+    username: "nothua",
+    password: "MLBB_Admin@Guide",
+  });
+  createUser({
+    name: "frei",
+    username: "frei",
+    password: "MLBB_Guide@2025",
+  });
 });

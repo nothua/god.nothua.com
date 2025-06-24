@@ -177,22 +177,22 @@ export async function fetchDailyWinrate(date: any) {
 export async function updateDailyWinrate(date: any = null) {
     try {
         const heroes = await fetchDailyWinrate(date);
-        const statRepo =
-            serviceLocator.resolve<StatRepository>("StatRepository");
+        // const statRepo =
+        //     serviceLocator.resolve<StatRepository>("StatRepository");
 
-        for (const hero of heroes) {
-            try {
-                await statRepo.create(hero);
-                console.log(`Updating hero ${hero.hero} ${hero.date}`);
-            } catch (ex) {
-                console.error("Error creating hero:", ex);
-            }
-        }
+        // for (const hero of heroes) {
+        //     try {
+        //         await statRepo.create(hero);
+        //         console.log(`Updating hero ${hero.hero} ${hero.date}`);
+        //     } catch (ex) {
+        //         console.error("Error creating hero:", ex);
+        //     }
+        // }
 
         sendWebhookNotification("Daily winrate updated successfully");
     } catch (ex: any) {
-        console.log("Error updating daily winrate:", ex.message);
-        sendWebhookNotification("Error updating daily winrate", ex);
+        console.log("Error updating daily winrate:", ex);
+        sendWebhookNotification("Error updating daily winrate", ex.message);
     }
 }
 
@@ -206,15 +206,31 @@ async function sendWebhookNotification(message: string, error?: any) {
     }
 
     try {
-        await fetch(DISCORD_WEBHOOK_URL, {
-            method: "POST",
-            body: JSON.stringify({
-                content: `🚨 **Daily Winrate Update Error** 🚨\n\n**Message:** ${message}\n**Error Details:** \`\`\`${
+
+        var _msg = ""
+        if(error)
+            _msg = `🚨 **Error** 🚨\n\n**Message:** ${message}\n**Error Details:** \`\`\`${
                     error?.message || "Unknown error"
-                }\`\`\``,
+                }\`\`\``;
+        else
+            _msg = `🚨 **Success** 🚨\n\n**Message:** ${message}`;
+
+        const req = await fetch(DISCORD_WEBHOOK_URL, {
+            method: "POST",
+            headers: [
+                ["Content-Type", "application/json"],
+                [
+                    "User-Agent",
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
+                ],
+            ],
+            body: JSON.stringify({
+                content: _msg,
                 username: "Moomers",
             })
         });
+
+        console.log(await req.json())
     } catch (webhookError) {
         console.error("Failed to send webhook notification:", webhookError);
     }

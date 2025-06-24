@@ -38,10 +38,10 @@ router.get("/fetchDailyWinrate", async (req: Request, res: Response) => {
     if (req.query.auth != "nothua")
         return res.json({ message: "Unauthorized" });
 
-    res.json({
-        message: "Updating",
-        time: Date.now(),
-    });
+    // res.json({
+    //     message: "Updating",
+    //     time: Date.now(),
+    // });
 
     if (req.query.date) {
         await updateDailyWinrate(new Date(req.query.date.toString()));

@@ -15,7 +15,7 @@ html(lang="en")
             div(class="flex space-x-4 mb-6")
                 // Rank Selector
                 select(
-                    x-model="rank" 
+                    x-model="rank"
                     @change="fetchHeroStats()"
                     class="bg-gray-800 text-white p-2 rounded"
                 )
@@ -28,7 +28,7 @@ html(lang="en")
 
                 // Date Range Selector
                 select(
-                    x-model="dateRange" 
+                    x-model="dateRange"
                     @change="fetchHeroStats()"
                     class="bg-gray-800 text-white p-2 rounded"
                 )
@@ -39,7 +39,7 @@ html(lang="en")
                     option(value="30") Last 30 Days
                     option(value="90") Last 90 Days
 
-                p(x-text="`Last Updated at: ${latestDate.toLocaleString()}`" class="ml-4 mt-2")
+                p(x-text="`Last Updated at: ${latestDate ? latestDate.toLocaleString() : 'N/A'}`" class="ml-4 mt-2")
 
             // Hero Stats Table
             div(class="bg-gray-800 rounded-lg overflow-hidden")
@@ -47,90 +47,95 @@ html(lang="en")
                     thead(class="bg-gray-700")
                         tr
                             th(
-                                class="p-3 cursor-pointer" 
+                                class="p-3 cursor-pointer"
                                 @click="sortBy('id')"
-                            ) 
-                                | Hero 
+                            )
+                                | Hero
                                 i(
-                                    class="fas ml-2" 
+                                    class="fas ml-2"
                                     :class="sortKey === 'id' ? (sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'"
                                 )
                             th(
-                                class="p-3 cursor-pointer" 
+                                class="p-3 cursor-pointer"
                                 @click="sortBy('winrate')"
-                            ) 
-                                | Winrate 
+                            )
+                                | Winrate
                                 i(
-                                    class="fas ml-2" 
+                                    class="fas ml-2"
                                     :class="sortKey === 'winrate' ? (sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'"
                                 )
                             th(
-                                class="p-3 cursor-pointer" 
+                                class="p-3 cursor-pointer"
                                 @click="sortBy('pickrate')"
-                            ) 
-                                | Pickrate 
+                            )
+                                | Pickrate
                                 i(
-                                    class="fas ml-2" 
+                                    class="fas ml-2"
                                     :class="sortKey === 'pickrate' ? (sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'"
                                 )
                             th(
-                                class="p-3 cursor-pointer" 
+                                class="p-3 cursor-pointer"
                                 @click="sortBy('banrate')"
-                            ) 
-                                | Banrate 
+                            )
+                                | Banrate
                                 i(
-                                    class="fas ml-2" 
+                                    class="fas ml-2"
                                     :class="sortKey === 'banrate' ? (sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'"
                                 )
                             th(class="p-3") Actions
 
                     tbody
-                        template(x-for="hero in sortedHeroes")
+                        template(x-for="hero in sortedHeroes" :key="hero.id")
                             tr(class="border-b border-gray-700 hover:bg-gray-700")
                                 td(class="p-3 flex items-center")
                                     img(
-                                        :src="hero.avatar" 
+                                        :src="hero.avatar"
                                         class="w-10 h-10 rounded-full mr-3"
                                     )
                                     span(x-text="hero.name")
                                 td(class="p-3")
-                                    span(x-text="`${hero.winrate}%`")
+                                    span(x-text="`${hero.winrate.toFixed(2)}%`")
                                 td(class="p-3")
-                                    span(x-text="`${hero.pickrate}%`")
+                                    span(x-text="`${hero.pickrate.toFixed(2)}%`")
                                 td(class="p-3")
-                                    span(x-text="`${hero.banrate}%`")
+                                    span(x-text="`${hero.banrate.toFixed(2)}%`")
                                 td(class="p-3 space-x-2")
                                     button(
                                         @click="showHeroTrend(hero)"
-                                        class="bg-green-500 text-white px-2 py-1 rounded text-sm" x-show="parseInt(dateRange) > 1"
+                                        class="bg-green-500 text-white px-2 py-1 rounded text-sm"
+                                        x-show="parseInt(dateRange) > 1"
                                     ) Trends
                                     button(
                                         @click="compareHero(hero)"
-                                        class="bg-blue-500 text-white px-2 py-1 rounded text-sm" x-show="false"
+                                        class="bg-blue-500 text-white px-2 py-1 rounded text-sm"
+                                        x-show="false" 
                                     ) Compare
 
             // Hero Trend Modal
             div(
-                x-show="selectedHeroTrend" 
-                x-cloak 
+                x-show="selectedHeroTrend"
+                x-cloak
                 class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
             )
                 div(class="bg-gray-800 p-6 rounded-lg w-11/12 max-w-4xl")
                     h2(
-                        class="text-2xl mb-4" 
+                        class="text-2xl mb-4"
                         x-text="selectedHeroTrend ? selectedHeroTrend.name + ' Trends' : ''"
                     )
-                    // Trend Details
+                    // Trend Details - Show Change Here!
                     div(class="grid grid-cols-3 gap-4 mb-4")
                         div(class="bg-gray-700 p-4 rounded")
-                            h3(class="font-bold mb-2") Recent Winrate
-                            p(x-text="selectedHeroTrend ? `${selectedHeroTrend.recentWinrate.toFixed(2)}%` : '-'")
+                            h3(class="font-bold mb-2") Winrate Change (Last #[span(x-text="dateRange")] days)
+                            p(:class="{'text-green-400': selectedHeroTrend && selectedHeroTrend.winrateChange >= 0, 'text-red-400': selectedHeroTrend && selectedHeroTrend.winrateChange < 0}"
+                               x-text="selectedHeroTrend ? `${selectedHeroTrend.winrateChange >= 0 ? '+' : ''}${selectedHeroTrend.winrateChange.toFixed(2)}%` : '-'")
                         div(class="bg-gray-700 p-4 rounded")
-                            h3(class="font-bold mb-2") Recent Pickrate
-                            p(x-text="selectedHeroTrend ? `${selectedHeroTrend.recentPickrate.toFixed(2)}%` : '-'")
+                            h3(class="font-bold mb-2") Pickrate Change (Last #[span(x-text="dateRange")] days)
+                            p(:class="{'text-green-400': selectedHeroTrend && selectedHeroTrend.pickrateChange >= 0, 'text-red-400': selectedHeroTrend && selectedHeroTrend.pickrateChange < 0}"
+                               x-text="selectedHeroTrend ? `${selectedHeroTrend.pickrateChange >= 0 ? '+' : ''}${selectedHeroTrend.pickrateChange.toFixed(2)}%` : '-'")
                         div(class="bg-gray-700 p-4 rounded")
-                            h3(class="font-bold mb-2") Recent Banrate
-                            p(x-text="selectedHeroTrend ? `${selectedHeroTrend.recentBanrate.toFixed(2)}%` : '-'")
+                            h3(class="font-bold mb-2") Banrate Change (Last #[span(x-text="dateRange")] days)
+                            p(:class="{'text-green-400': selectedHeroTrend && selectedHeroTrend.banrateChange >= 0, 'text-red-400': selectedHeroTrend && selectedHeroTrend.banrateChange < 0}"
+                               x-text="selectedHeroTrend ? `${selectedHeroTrend.banrateChange >= 0 ? '+' : ''}${selectedHeroTrend.banrateChange.toFixed(2)}%` : '-'")
 
                     // Tabs for Charts
                     div(class="flex border-b border-gray-700 mb-4")
@@ -164,15 +169,14 @@ html(lang="en")
                         class="mt-4 bg-red-600 text-white px-4 py-2 rounded"
                     ) Close
 
-            // Compare Modal
             div(
-                x-show="comparedHero" 
-                x-cloak 
+                x-show="comparedHero"
+                x-cloak
                 class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
             )
                 div(class="bg-gray-800 p-6 rounded-lg w-3/4")
                     h2(
-                        class="text-2xl mb-4" 
+                        class="text-2xl mb-4"
                         x-text="comparedHero ? 'Compare ' + comparedHero.name : ''"
                     )
                     // Comparison Filters
@@ -200,14 +204,14 @@ html(lang="en")
                     div(x-show="comparisonResults" class="grid grid-cols-2 gap-4")
                         div
                             h3(class="font-bold mb-2") Original Stats
-                            p(x-text="`Winrate: ${comparedHero ? comparedHero.winrate : '-'}%`")
-                            p(x-text="`Pickrate: ${comparedHero ? comparedHero.pickrate : '-'}%`")
-                            p(x-text="`Banrate: ${comparedHero ? comparedHero.banrate : '-'}%`")
+                            p(x-text="`Winrate: ${comparedHero ? comparedHero.winrate.toFixed(2) : '-'}%`")
+                            p(x-text="`Pickrate: ${comparedHero ? comparedHero.pickrate.toFixed(2) : '-'}%`")
+                            p(x-text="`Banrate: ${comparedHero ? comparedHero.banrate.toFixed(2) : '-'}%`")
                         div
                             h3(class="font-bold mb-2") Compared Stats
-                            p(x-text="`Winrate: ${comparisonResults ? comparisonResults.winrate : '-'}%`")
-                            p(x-text="`Pickrate: ${comparisonResults ? comparisonResults.pickrate : '-'}%`")
-                            p(x-text="`Banrate: ${comparisonResults ? comparisonResults.banrate : '-'}%`")
+                            p(x-text="`Winrate: ${comparisonResults ? comparisonResults.winrate.toFixed(2) : '-'}%`")
+                            p(x-text="`Pickrate: ${comparisonResults ? comparisonResults.pickrate.toFixed(2) : '-'}%`")
+                            p(x-text="`Banrate: ${comparisonResults ? comparisonResults.banrate.toFixed(2) : '-'}%`")
 
                     button(
                         @click="comparedHero = null"
@@ -221,7 +225,7 @@ html(lang="en")
                     heroStats: [],
                     rank: 'All',
                     dateRange: '7',
-                    sortKey: 'winrate',
+                    sortKey: 'winrate', 
                     sortDirection: 'desc',
                     selectedHeroTrend: null,
                     activeTrendTab: 'winrate',
@@ -249,6 +253,7 @@ html(lang="en")
                             this.latestDate = new Date(latestStat.date);
                         } catch (error) {
                             console.error('Failed to fetch latest stat:', error);
+                            this.latestDate = null;
                         }
                     },
 
@@ -265,13 +270,14 @@ html(lang="en")
                             this.heroStats = await response.json();
                         } catch (error) {
                             console.error('Failed to fetch hero stats:', error);
+                            this.heroStats = []; 
                         }
                     },
 
                     get sortedHeroes() {
                         return [...this.heroStats].sort((a, b) => {
                             const modifier = this.sortDirection === 'asc' ? 1 : -1;
-                            return modifier * (a[this.sortKey] - b[this.sortKey]);
+                            return modifier * ((a[this.sortKey] || 0) - (b[this.sortKey] || 0));
                         });
                     },
 
@@ -294,13 +300,31 @@ html(lang="en")
                                     dateRange: this.dateRange
                                 })
                             });
-                            const trendData = await response.json(); 
+                            const trendData = await response.json();
+
+                            if (trendData.length === 0) {
+                                console.warn('No trend data available for this hero in the selected range.');
+                                this.selectedHeroTrend = { ...hero, winrateChange: 0, pickrateChange: 0, banrateChange: 0 };
+                                this.$nextTick(() => {
+                                    this.destroyTrendCharts(); 
+                                });
+                                return;
+                            }
+
+                            trendData.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+                            const latestStat = trendData[trendData.length - 1];
+                            const earliestStat = trendData[0];
+
+                            const winrateChange = (latestStat.winrate || 0) - (earliestStat.winrate || 0);
+                            const pickrateChange = (latestStat.pickrate || 0) - (earliestStat.pickrate || 0);
+                            const banrateChange = (latestStat.banrate || 0) - (earliestStat.banrate || 0);
 
                             this.selectedHeroTrend = {
                                 ...hero,
-                                recentWinrate: trendData.length > 0 ? trendData[trendData.length - 1].winrate || hero.winrate : hero.winrate,
-                                recentPickrate: trendData.length > 0 ? trendData[trendData.length - 1].pickrate || hero.pickrate : hero.pickrate,
-                                recentBanrate: trendData.length > 0 ? trendData[trendData.length - 1].banrate || hero.banrate : hero.banrate,
+                                winrateChange: winrateChange,
+                                pickrateChange: pickrateChange,
+                                banrateChange: banrateChange,
                             };
 
                             const dates = trendData.map(stat => new Date(stat.date).toLocaleDateString());
@@ -308,7 +332,7 @@ html(lang="en")
                             const pickrates = trendData.map(stat => stat.pickrate || 0);
                             const banrates = trendData.map(stat => stat.banrate || 0);
 
-                            this.$nextTick(() => { 
+                            this.$nextTick(() => {
                                 this.destroyTrendCharts();
 
                                 const winrateCtx = document.getElementById('winrateTrendChart').getContext('2d');
@@ -361,6 +385,8 @@ html(lang="en")
                             });
                         } catch (error) {
                             console.error('Failed to fetch hero trend:', error);
+                            this.selectedHeroTrend = null; 
+                            this.destroyTrendCharts();
                         }
                     },
 
@@ -370,7 +396,7 @@ html(lang="en")
                             maintainAspectRatio: false,
                             scales: {
                                 x: {
-                                    type: 'category',
+                                    type: 'category', 
                                     title: {
                                         display: true,
                                         text: 'Date',
@@ -424,7 +450,7 @@ html(lang="en")
 
                     closeHeroTrendModal() {
                         this.selectedHeroTrend = null;
-                        this.destroyTrendCharts(); // Destroy all charts when modal closes
+                        this.destroyTrendCharts();
                     },
 
                     async compareHero(hero) {
@@ -446,6 +472,7 @@ html(lang="en")
                             this.comparisonResults = await response.json();
                         } catch (error) {
                             console.error('Failed to compare hero:', error);
+                            this.comparisonResults = null;
                         }
                     }
                 };

@@ -137,7 +137,7 @@ export async function fetchDailyWinrate(date: any) {
 
     if (date == null) date = new Date();
     else date = new Date(date);
-    date.setHours(0, 0, 0, 0);
+    // date.setHours(0, 0, 0, 0);
 
     for (const rank in RANKS) {
         for (const heroData of ranks[rank]) {
@@ -207,7 +207,7 @@ export async function updateDailyWinrate(date: any = null) {
 }
 
 const DISCORD_WEBHOOK_URL =
-    "https://discord.com/api/webhooks/1313334273268387910/BSTUfOtNpxAJBR9l5B5s6_pa_44-Jxj_7UowNQiXUjR3MEccgc7u6fMYaxa65RnHl4No";
+    "https://discord.com/api/webhooks/1387318481057480715/uaI7_qVX7sVzt88A04K6gWzXfhZSExSJEks6WN8nOHx07aa5P29JWvnkze7F2HbuO74k";
 
 async function sendWebhookNotification(message: string, error?: any) {
     if (!DISCORD_WEBHOOK_URL) {
@@ -218,11 +218,11 @@ async function sendWebhookNotification(message: string, error?: any) {
     try {
         var _msg = ""
         if(error)
-            _msg = `🚨 **Error** 🚨\n\n**Message:** ${message}\n**Error Details:** \`\`\`${
+            _msg = `**Error** \n**Message:** ${message}\n**Error Details:** \`\`\`${
                     error?.message || "Unknown error"
                 }\`\`\``;
         else
-            _msg = `🚨 **Success** 🚨\n\n**Message:** ${message}`;
+            _msg = `**Success** \n**Message:** ${message}`;
 
         const req = await fetch(DISCORD_WEBHOOK_URL, {
             method: "POST",

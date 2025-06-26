@@ -58,4 +58,33 @@ const schema = new Schema({
     },
 });
 
+export interface IStat {
+    hero: number;
+    ranks: Array<{
+        pickrate: number;
+        winrate: number;
+        banrate: number;
+        rank: RANK;
+        relations: Array<{
+            hero: number;
+            type: Relation;
+            winrate: number;
+        }>;
+    }>;
+    date: number;
+}
+
+export interface SimplifiedHeroTrend {
+    hero: number;
+    date: number;
+    pickrate: number;
+    winrate: number;
+    banrate: number;
+    relations: Array<{
+        hero: number;
+        type: Relation;
+        winrate: number;
+    }>;
+}
+
 export default model<Document>("Stat", schema);

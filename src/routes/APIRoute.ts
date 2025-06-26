@@ -38,11 +38,6 @@ router.get("/fetchDailyWinrate", async (req: Request, res: Response) => {
     if (req.query.auth != "nothua")
         return res.json({ message: "Unauthorized" });
 
-    // res.json({
-    //     message: "Updating",
-    //     time: Date.now(),
-    // });
-
     if (req.query.date) {
         await updateDailyWinrate(new Date(req.query.date.toString()));
         return;
@@ -51,7 +46,7 @@ router.get("/fetchDailyWinrate", async (req: Request, res: Response) => {
     await updateDailyWinrate();
 
 
-    res.json({message: "Updated", time: Date.now()});
+    res.json({ message: "Updated", time: Date.now() });
 });
 
 router.post("/fetchHeroes", async (req: Request, res: Response) => {
@@ -180,6 +175,25 @@ router.get("/hero-stats/latest", async (req: Request, res: Response) => {
         console.error("Failed to fetch latest stat:", error);
         res.status(500).json({
             message: "Failed to fetch latest stat",
+            error: error.message,
+        });
+    }
+});
+
+router.post("/hero-trend/:id", async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { rank = "All", dateRange } = req.body;
+
+    if (isNaN(parseInt(dateRange)))
+        return res.status(400).json({ message: "Invalid date range" });
+
+    try {
+        const trend = await statRepo().getHeroTrend(id, RANK[rank as keyof typeof RANK], parseInt(dateRange));
+        res.json(trend);
+    } catch (error: any) {
+        console.error("Failed to fetch hero trend:", error);
+        res.status(500).json({
+            message: "Failed to fetch hero trend",
             error: error.message,
         });
     }

@@ -39,7 +39,16 @@ app.use((req, res, next) => {
 
 try {
     Mongoose.connect(process.env.MONGO_URI || "");
-    console.log("Mongodb connected");
+
+        
+    Mongoose.connection.on("connected", () => {
+        console.log("Connected to MongoDB");
+    });
+
+    Mongoose.connection.on("disconnected", () => {
+        console.log("Disconnected from MongoDB");
+    });
+
     registerServicesFromDirectory();
 } catch (e) {
     console.log(e);

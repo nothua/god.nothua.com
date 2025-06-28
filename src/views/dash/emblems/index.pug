@@ -29,6 +29,7 @@ block content
                                             span Name
                                     th(class="rtl:text-right dark:text-gray-400 py-3.5" scope="col").px-12.text-sm.font-small.text-start.text-gray-500
                                         span Attributes
+                                    th(class="rtl:text-right dark:text-gray-400 py-3.5" scope="col").px-12.text-sm.font-small.text-left.text-gray-500
                             tbody.bg-white.divide-y.divide-gray-200(class="dark:divide-gray-700 dark:bg-gray-900")
                                 template(x-for="emblem in filteredEmblems" :key="emblem._id")
                                     tr
@@ -36,15 +37,41 @@ block content
                                             img(:src="emblem.image" alt="emblem" class="w-10 h-10 rounded-full")
                                         td.text-sm.font-medium.whitespace-nowrap.text-gray-800(class="dark:text-white" x-text="emblem.name")
                                         td.px-12.py-4.text-sm.whitespace-nowrap
-                                            .flex.flex-wrap.items-center.gap-x-6
-                                                template(x-for="attr in emblem.attributes" :key="attr._id")
-                                                    p(class="flex-1")
+                                            .grid.gap-y-2
+                                                template(x-for="attr in emblem.attributes" :key="attr._id || attr.name + attr.value")
+                                                    span
                                                         span(x-text="attr.name + ' : '" class="dark:text-white")
                                                         span(x-text="attr.value")
+                                        td.px-12.py-4.text-sm.whitespace-nowrap
+                                            btn.btn.btn-ghost.text-gray-500.transition-colors.duration-200(class="dark:hover:text-blue-500 dark:text-gray-300 hover:text-blue-500 focus:outline-none" @click="editEmblem(emblem)").w-12.text-center Edit
 
-                                                p(x-text="" class="flex-1" x-show="emblem.attributes.length != 4")
+        dialog.modal#editModal
+            .modal-box
+                form(method="dialog" @submit.prevent="saveEmblem")
+                    button.btn.btn-sm.btn-circle.btn-ghost.absolute.right-2.top-2(type="button" @click="editModal.close()") X
+                    h3.text-lg.font-bold Edit Emblem
+                    .py-4.grid.grid-cols-2.gap-x-6
+                        .mb-4.col-span-2
+                            fieldset.fieldset.w-full
+                                legend.fieldset-legend Name
+                                input.input.w-full.mt-2.input-primary(type="text" x-model="form_data.name" )
 
+                        .mb-4.col-span-2
+                            fieldset.fieldset.w-full
+                                legend.fieldset-legend Attributes
+                                .flex.flex-col.gap-2.mt-2
+                                    template(x-for="(attribute, index) in form_data.attributes" :key="index")
+                                        .flex.items-center.gap-2
+                                            input.input.flex-1.input-sm.input-bordered(type="text" placeholder="Attribute Name" x-model="attribute.name")
+                                            input.input.flex-1.input-sm.input-bordered(type="text" placeholder="Attribute Value" x-model="attribute.value")
+                                            button.btn.btn-sm.btn-square.btn-error(type="button" @click="removeAttribute(index)")
+                                                i.fas.fa-minus
+                                    button.btn.btn-sm.btn-success.mt-2(type="button" @click="addAttribute")
+                                        i.fas.fa-plus 
+                                        |  Add Attribute
 
+                    .modal-action
+                        button.btn.btn-primary(type="submit") Save Changes
 
 block scripts
     script.
@@ -56,6 +83,10 @@ block scripts
                 openDropdown: null,
                 isOpen: false,
                 form_data: {
+                    _id: '',
+                    name: '',
+                    attributes: [], 
+                    image: ''
                 },
                 init() {
                     this.loadEmblems()
@@ -68,11 +99,11 @@ block scripts
 
                     hideLoading()
 
-                    if(error)
+                    if(error) {
                         return showAlert("error", "Something happened. Please try again")
+                    }
 
                     this.emblems = response.data
-
                     this.filteredEmblems = this.emblems
                     this.renderEmblems()
                 },
@@ -88,11 +119,45 @@ block scripts
                     document.getElementById("emblems-count").innerHTML = this.filteredEmblems.length + (this.filteredEmblems.length == 1 ? " emblem" : " emblems")
                 },
 
-                async deleteemblem(emblemId){
-                    showModal("Are you sure?", "The emblem cannot be accessed once deleted.", "Delete", async () => {
-                        const preloader = document.getElementById("preloader")
-                        preloader.classList.remove("hidden")
+                editEmblem(emblem) {
+                    this.form_data = JSON.parse(JSON.stringify(emblem));
+                    if (!this.form_data.attributes) {
+                        this.form_data.attributes = [];
+                    }
+                    editModal.showModal();
+                },
 
+                addAttribute() {
+                    this.form_data.attributes.push({ name: '', value: '' });
+                },
+
+                removeAttribute(index) {
+                    this.form_data.attributes.splice(index, 1);
+                },
+
+                async saveEmblem() {
+                    showLoading();
+                    try {
+                        const response = await axios.post(`/dash/emblems/update/${this.form_data._id}`, this.form_data);
+
+                        if (response.data.success) {
+                            showAlert("success", response.data.message);
+                            editModal.close();
+                            await this.loadEmblems(); 
+                        } else {
+                            showAlert("error", response.data.message);
+                        }
+                    } catch (error) {
+                        console.error("Error saving emblem:", error.response ? error.response.data : error.message);
+                        showAlert("error", "Something happened. Please try again");
+                    } finally {
+                        hideLoading();
+                    }
+                },
+
+                async deleteEmblem(emblemId){
+                    showModal("Are you sure?", "The emblem cannot be accessed once deleted.", "Delete", async () => {
+                        showLoading();
                         try{
                             const response = await axios.delete(`/emblems/delete/${emblemId}`)
 
@@ -101,11 +166,12 @@ block scripts
                             else
                                 showAlert("error", response.data.message)
                         }catch (error){
-                            console.log(error.message)
+                            console.error("Error deleting emblem:", error.message)
                             showAlert("error", "Something happened. Please try again")
+                        } finally {
+                            hideLoading(); 
                         }
-
-                        await this.loadEmblems()
+                        await this.loadEmblems() 
                     })
                 },
             }))

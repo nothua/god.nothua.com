@@ -7,7 +7,7 @@ import express, {
 } from "express";
 import cookieParser from "cookie-parser";
 import Mongoose from "mongoose";
-import { registerServicesFromDirectory } from "./utils";
+import { registerServicesFromDirectory, sendWebhookNotification } from "./utils";
 
 const app = express();
 
@@ -40,7 +40,6 @@ app.use((req, res, next) => {
 try {
     Mongoose.connect(process.env.MONGO_URI || "");
 
-        
     Mongoose.connection.on("connected", () => {
         console.log("Connected to MongoDB");
     });
@@ -48,6 +47,10 @@ try {
     Mongoose.connection.on("disconnected", () => {
         console.log("Disconnected from MongoDB");
     });
+
+    if (process.env.LOCAL != "true") {
+        sendWebhookNotification("Changea applied.");
+    }
 
     registerServicesFromDirectory();
 } catch (e) {

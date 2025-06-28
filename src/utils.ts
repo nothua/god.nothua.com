@@ -96,3 +96,43 @@ export function convertToHTML5(skillDesc: any) {
 export function reform_string(str: String) {
     return str.replace(/[^A-Z0-9]+/gi, "_").toLowerCase();
 }
+
+
+
+const DISCORD_WEBHOOK_URL =
+    "https://discord.com/api/webhooks/1387318481057480715/uaI7_qVX7sVzt88A04K6gWzXfhZSExSJEks6WN8nOHx07aa5P29JWvnkze7F2HbuO74k";
+
+export async function sendWebhookNotification(message: string, error?: any) {
+    if (!DISCORD_WEBHOOK_URL) {
+        console.error("Discord webhook URL not configured");
+        return;
+    }
+
+    try {
+        var _msg = ""
+        if (error)
+            _msg = `**Error** \n**Message:** ${message}\n**Error Details:** \`\`\`${error?.message || "Unknown error"
+                }\`\`\``;
+        else
+            _msg = `**Success** \n**Message:** ${message}`;
+
+        const req = await fetch(DISCORD_WEBHOOK_URL, {
+            method: "POST",
+            headers: [
+                ["Content-Type", "application/json"],
+                [
+                    "User-Agent",
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
+                ],
+            ],
+            body: JSON.stringify({
+                content: _msg,
+                username: "Moomers",
+            })
+        });
+
+        console.log(await req.json())
+    } catch (webhookError) {
+        console.error("Failed to send webhook notification:", webhookError);
+    }
+}

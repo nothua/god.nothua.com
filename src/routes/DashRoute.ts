@@ -275,6 +275,35 @@ router.post(
 //Update
 
 router.post(
+    "/emblems/update/:id", authMiddleware, async (req: Request, res: Response) => {
+        const { id } = req.params;
+        const { name, attributes } = req.body;
+
+        const emblem = await emblemRepo().get(id) as any;
+
+        if (!emblem) {
+            return res.json({
+                success: false,
+                message: "Couldn't find emblem",
+            });
+        }
+
+        try {
+            emblem.name = name;
+            emblem.attributes = attributes;
+
+            await emblemRepo().upsert(emblem);
+
+            return res.json({ success: true, message: "Emblem updated" });
+        } catch (ex) {
+            return res.json({
+                success: false,
+                message: "Couldn't update emblem",
+            });
+        }
+    })
+
+router.post(
     "/talents/update/:id", authMiddleware, async (req: Request, res: Response) => {
         const { id } = req.params;
         const { name, tier, description, emblem } = req.body;

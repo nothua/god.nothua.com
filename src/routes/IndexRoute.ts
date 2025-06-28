@@ -17,7 +17,7 @@ router.get("/winrates", (req: Request, res: Response) => {
 });
 
 router.get("/login", async (req: Request, res: Response) => {
-    if (req.cookies.userId) return res.redirect("/");
+    if (req.cookies.userId) return res.redirect("/dash");
 
     res.render("dash/login");
 });

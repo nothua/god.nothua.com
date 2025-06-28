@@ -1,0 +1,112 @@
+extends ../_layout
+
+block content
+    section.container.mx-auto(x-data="emblemList")
+        div(class="sm:flex sm:items-center sm:justify-between")
+            div
+                .flex.items-center.gap-x-3
+                    h2.text-lg.font-medium.text-gray-800(class="dark:text-white") Emblems
+                    span.px-3.py-1.text-xs.text-blue-600.bg-blue-100.rounded-full(class="dark:bg-gray-800 dark:text-blue-400")#emblems-count 200 emblems
+
+        .hidden.flex.items-center.mt-6.text-center.border.rounded-lg.h-96(class="dark:border-gray-700")#no-emblems
+            .flex.flex-col.w-full.max-w.sm.px-4.mx-auto
+                .p-3.mx-auto.text-blue-500.bg-blue-100.rounded-full(class="dark:bg-gray-800")
+                    i.w-6.h-6.fas.fa-search
+                h1.mt-3.text-lg.text-gray-800(class="dark:text-white") No emblems found
+                p.mt-2.text-gray-500(class="dark:text-gray-400") Please try again
+
+        .flex.flex-col.mt-6.min-h-96#emblems-table-layout
+            .overflow-x-auto(class="-my-2 md:-mx-6 lg:-mx-8")
+                .inline-block.min-w-full.py-2.align-middle(class="md:px-6 lg:px-8")
+                    .overflow-hidden.border.border-gray-200(class="dark:border-gray-700 md:rounded-lg")
+                        table.min-w-full.divide-y.divide-gray-200(class="dark:divide-gray-700")#emblems-table
+                            thead.bg-gray-50(class="dark:bg-gray-800")
+                                tr
+                                    th(class="py-3.5 rtl:text-right dark:text-gray-400" width="100" scope="col").px-4.text-sm.font-small.text-left.text-gray-500
+                                        span(style="visibility:hidden") Image
+                                    th(class="rtl:text-right dark:text-gray-400 py-3.5" scope="col").text-sm.font-small.text-left.text-gray-500
+                                        button.flex.items-center.gap-x-3(class="focus:outline-none")
+                                            span Name
+                                    th(class="rtl:text-right dark:text-gray-400 py-3.5" scope="col").px-12.text-sm.font-small.text-start.text-gray-500
+                                        span Attributes
+                            tbody.bg-white.divide-y.divide-gray-200(class="dark:divide-gray-700 dark:bg-gray-900")
+                                template(x-for="emblem in filteredEmblems" :key="emblem._id")
+                                    tr
+                                        td.text-sm.font-medium.whitespace-nowrap.text-gray-800.px-4(class="dark:text-white")
+                                            img(:src="emblem.image" alt="emblem" class="w-10 h-10 rounded-full")
+                                        td.text-sm.font-medium.whitespace-nowrap.text-gray-800(class="dark:text-white" x-text="emblem.name")
+                                        td.px-12.py-4.text-sm.whitespace-nowrap
+                                            .flex.flex-wrap.items-center.gap-x-6
+                                                template(x-for="attr in emblem.attributes" :key="attr._id")
+                                                    p(class="flex-1")
+                                                        span(x-text="attr.name + ' : '" class="dark:text-white")
+                                                        span(x-text="attr.value")
+
+                                                p(x-text="" class="flex-1" x-show="emblem.attributes.length != 4")
+
+
+
+block scripts
+    script.
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('emblemList', () => ({
+                emblems: [],
+                filteredEmblems: [],
+                isFormOpen: false,
+                openDropdown: null,
+                isOpen: false,
+                form_data: {
+                },
+                init() {
+                    this.loadEmblems()
+                },
+
+                async loadEmblems(){
+                    showLoading()
+
+                    const [error, response] = await axios.get[Symbol.result]("/dash/emblems/list", {})
+
+                    hideLoading()
+
+                    if(error)
+                        return showAlert("error", "Something happened. Please try again")
+
+                    this.emblems = response.data
+
+                    this.filteredEmblems = this.emblems
+                    this.renderEmblems()
+                },
+
+                async renderEmblems(){
+                    if(this.filteredEmblems.length > 0){
+                        document.getElementById("emblems-table-layout").classList.remove("hidden")
+                        document.getElementById("no-emblems").classList.add("hidden")
+                    }else{
+                        document.getElementById("emblems-table-layout").classList.add("hidden")
+                        document.getElementById("no-emblems").classList.remove("hidden")
+                    }
+                    document.getElementById("emblems-count").innerHTML = this.filteredEmblems.length + (this.filteredEmblems.length == 1 ? " emblem" : " emblems")
+                },
+
+                async deleteemblem(emblemId){
+                    showModal("Are you sure?", "The emblem cannot be accessed once deleted.", "Delete", async () => {
+                        const preloader = document.getElementById("preloader")
+                        preloader.classList.remove("hidden")
+
+                        try{
+                            const response = await axios.delete(`/emblems/delete/${emblemId}`)
+
+                            if(response.data.success)
+                                showAlert("success", response.data.message)
+                            else
+                                showAlert("error", response.data.message)
+                        }catch (error){
+                            console.log(error.message)
+                            showAlert("error", "Something happened. Please try again")
+                        }
+
+                        await this.loadEmblems()
+                    })
+                },
+            }))
+        })

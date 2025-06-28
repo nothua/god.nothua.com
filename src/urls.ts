@@ -6,6 +6,10 @@ export function HEROES() {
     return "https://api.gms.moontontech.com/api/gms/source/2669606/2756564";
 }
 
+export function HEROES_WINRATE() {
+    return "https://api.gms.moontontech.com/api/gms/source/2669606/2674709";
+}
+
 export function HERO_COMPATIBILITY() {
     return "https://api.gms.moontontech.com/api/gms/source/2669606/2756569";
 }
@@ -13,7 +17,6 @@ export function HERO_COMPATIBILITY() {
 export function HERO_LANE_WR() {
     return "https://api.gms.moontontech.com/api/gms/source/2713644/2777027";
 }
-
 
 export function HERO_BUILDS_TOP() {
     return "https://api.gms.moontontech.com/api/gms/source/2713644/2776688";

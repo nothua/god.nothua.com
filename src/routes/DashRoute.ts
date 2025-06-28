@@ -13,14 +13,27 @@ import {
     SkillType,
     SkinRarity,
 } from "../models/Hero";
+import type JungleSpeedRepository from "../repositories/JungleSpeedRepository";
+import type TalentRepository from "../repositories/TalentRepository";
+import type EmblemRepository from "../repositories/EmblemRepository";
 
 const router = require("express").Router();
 
 const heroRepo = () => {
     return getServiceLocator().resolve<HeroRepository>("HeroRepository");
 };
+const jungleSpeedRepo = () => {
+    return getServiceLocator().resolve<JungleSpeedRepository>("JungleSpeedRepository");
+};
 const userRepo = () => {
     return getServiceLocator().resolve<UserRepository>("UserRepository");
+};
+const talentRepo = () => {
+    return getServiceLocator().resolve<TalentRepository>("TalentRepository");
+};
+
+const emblemRepo = () => {
+    return getServiceLocator().resolve<EmblemRepository>("EmblemRepository");
 };
 
 router.use(authMiddleware);
@@ -38,6 +51,11 @@ const routes = async (req: Request) => {
             icon: "helmet-battle",
             name: "Heroes",
             route: "/dash/heroes",
+        },
+        {
+            icon: "seedling",
+            name: "Jungle Speed",
+            route: "/dash/junglespeed",
         },
         {
             icon: "swords",
@@ -94,6 +112,27 @@ router.get(`/heroes`, async (req: Request, res: Response) => {
         routes: await routes(req),
         types: RoleType,
         active: "Heroes",
+    });
+});
+
+router.get(`/junglespeed`, async (req: Request, res: Response) => {
+    res.render("dash/heroes/index", {
+        routes: await routes(req),
+        active: "Jungle Speed",
+    });
+});
+
+router.get(`/emblems`, async (req: Request, res: Response) => {
+    res.render("dash/emblems/index", {
+        routes: await routes(req),
+        active: "Emblems",
+    });
+});
+
+router.get(`/talents`, async (req: Request, res: Response) => {
+    res.render("dash/talents/index", {
+        routes: await routes(req),
+        active: "Talents",
     });
 });
 
@@ -159,6 +198,40 @@ router.get(`/heroes/list`, async (req: Request, res: Response) => {
                 if (a._id > b._id) return -1;
                 return 0;
             });
+
+        res.json(data);
+    } catch (ex) {
+        console.error(ex);
+    }
+});
+
+router.get(`/emblems/list`, async (req: Request, res: Response) => {
+    try {
+        const emblems = await emblemRepo().getAll();
+
+        res.json(emblems);
+    } catch (ex) {
+        console.error(ex);
+    }
+});
+
+router.get(`/talents/list`, async (req: Request, res: Response) => {
+    try {
+        const talents = await talentRepo().getAll();
+
+        res.json(talents.sort((a: any, b: any) => {
+            if (a.tier < b.tier) return -1;
+            if (a.tier > b.tier) return 1;
+            return 0;
+        }));
+    } catch (ex) {
+        console.error(ex);
+    }
+});
+
+router.get(`/junglespeed/list`, async (req: Request, res: Response) => {
+    try {
+        const data = await jungleSpeedRepo().getPopulatedData();
 
         res.json(data);
     } catch (ex) {

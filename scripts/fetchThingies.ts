@@ -1,11 +1,13 @@
 import { writeFileSync } from "fs";
 import { EMBLEMS, EMBLEM_TALENTS, SPELLS } from "../src/urls";
-import { getServiceLocator } from "../src/utils";
+import { convertToHTML5, getServiceLocator } from "../src/utils";
 import type EmblemRepository from "../src/repositories/EmblemRepository";
 import axios from "axios";
 import { getHeroesCount } from "./fetchHeroes";
 import { Binary } from "mongodb";
 import { ImageRepository } from "../src/classes/ImageRepository";
+import * as cheerio from "cheerio";
+import type TalentRepository from "../src/repositories/TalentRepository";
 
 const serviceLocator = getServiceLocator();
 
@@ -60,8 +62,8 @@ export async function fetchEmblems() {
                 emblemData.emblemname == "All"
                     ? "Common"
                     : emblemData.emblemname,
-            _id: emblemData.emblemid,
             attributes,
+            _id: emblemData.emblemid,
         });
     }
 
@@ -75,40 +77,27 @@ export async function fetchTalents() {
     for (const talent of talents) {
         const talentTier = talent.data.gifttiers;
         const talentData = talent.data.emblemskill;
+        const imageIcon = talentData.skillicon;
 
-        const attributes = [];
+        const skilldesc = talentData.skilldesc;
 
-        const emblemAttrs = emblemData.emblemattr.emblemattr.split("\n");
+        parsedTalents.push({
+            image: imageIcon,
+            tier: talentTier,
+            name: talentData.skillname,
+            description: (() => {
+                const htmlContent = convertToHTML5(skilldesc);
+                const $ = cheerio.load(htmlContent);
 
-        for (const attr_ of emblemAttrs) {
-            const percentage = attr_.includes("%");
-            const attr_value = parseInt(attr_);
-            const attr_name = attr_
-                .replace(attr_value.toString(), "")
-                .replace("+", "")
-                .replace("%", "")
-                .trim();
+                $("br").replaceWith("\n");
 
-            if (!Number.isNaN(attr_value)) {
-                attributes.push({
-                    name: !percentage ? attr_name : attr_name + " %",
-                    value: attr_value,
-                });
-            }
-        }
-
-        parsedEmblems.push({
-            image: emblemIcon,
-            name:
-                emblemData.emblemname == "All"
-                    ? "Common"
-                    : emblemData.emblemname,
-            _id: emblemData.emblemid,
-            attributes,
+                return $("body").text().trim();
+            })(),
+            _id: talentData.skillid,
         });
     }
 
-    return parsedEmblems;
+    return parsedTalents;
 }
 
 export async function updateEmblems() {
@@ -133,5 +122,31 @@ export async function updateEmblems() {
 
         const entry = await emblemsRepo.upsert(emblem);
         console.log("Emblem updated: ", entry);
+    }
+}
+
+
+export async function updateTalents() {
+    const talents = await fetchTalents();
+    const imageRepo = ImageRepository.getInstance();
+    const talentRepo =
+        serviceLocator.resolve<TalentRepository>("TalentRepository");
+
+    for (const talent of talents) {
+        console.log("Updating talent: ", talent.name);
+
+        const talentImage = await axios.get(talent.image, {
+            responseType: "arraybuffer",
+        });
+        const talentImageBinary = new Binary(Buffer.from(talentImage.data));
+        const talentImageUrl = await imageRepo.uploadImage(
+            "talents/",
+            talent._id,
+            talentImageBinary
+        );
+        talent.image = talentImageUrl;
+
+        const entry = await talentRepo.upsert(talent);
+        console.log("Talent updated: ", entry);
     }
 }

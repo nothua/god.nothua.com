@@ -31,6 +31,7 @@ block content
                                         span Tier
                                     th(class="rtl:text-right dark:text-gray-400 py-3.5" scope="col").px-12.text-sm.font-small.text-left.text-gray-500
                                         span Description
+                                    th(class="rtl:text-right dark:text-gray-400 py-3.5" scope="col").px-12.text-sm.font-small.text-left.text-gray-500
                             tbody.bg-white.divide-y.divide-gray-200(class="dark:divide-gray-700 dark:bg-gray-900")
                                 template(x-for="talent in filteredTalents" :key="talent._id")
                                     tr
@@ -38,39 +39,98 @@ block content
                                             img(:src="talent.image" alt="talent" class="w-10 h-10 rounded-full")
                                         td.text-sm.font-medium.whitespace-nowrap.text-gray-800(class="dark:text-white" x-text="talent.name")
                                         td.px-12.py-4.text-sm.font-medium.whitespace-nowrap.text-gray-800(class="dark:text-white" x-text="talent.tier")
-                                        td.px-12.py-4.text-sm.whitespace-nowrap 
+                                        td.px-12.py-4.text-sm
                                             p(x-html="talent.description.replaceAll('\\n', '<br>')")
+                                        td.px-12.py-4.text-sm.whitespace-nowrap
+                                            btn.btn.btn-ghost.text-gray-500.transition-colors.duration-200(class="dark:hover:text-blue-500 dark:text-gray-300 hover:text-blue-500 focus:outline-none" @click="editTalent(talent)").w-12.text-center Edit
 
+        dialog.modal#editModal
+            .modal-box
+                form(method="dialog" @submit.prevent="saveTalent")
+                    button.btn.btn-sm.btn-circle.btn-ghost.absolute.right-2.top-2(type="button" @click="editModal.close()") X
+                    h3.text-lg.font-bold Edit Talent
+                    .py-4.grid.grid-cols-2.gap-x-6
+                        .mb-4
+                            fieldset.fieldset.w-full
+                                legend.fieldset-legend Name
+                                input.input.w-full.mt-2.input-primary(type="text" x-model="form_data.name" )
+                        .mb-4
+                            fieldset.fieldset.w-full
+                                legend.fieldset-legend Tier
+                                select.select.w-full.mt-2.select-primary(x-model="form_data.tier")
+                                    option(value="1") 1
+                                    option(value="2") 2
+                                    option(value="3") 3
+
+                        .mb-4.col-span-2
+                            fieldset.fieldset.w-full
+                                legend.fieldset-legend Emblem
+                                select.select.w-full.mt-2.select-primary(x-model="form_data.emblem")
+                                    option(value="" disabled) Select Emblem
+                                    template(x-for="emblem in emblems" :key="emblem._id")
+                                        option(:value="emblem._id" x-html="emblem.name")
+
+                        .mb-4.col-span-2
+                            fieldset.fieldset.w-full
+                                legend.fieldset-legend Description
+                                textarea.input.w-full.mt-2.input-primary.pt-4.h-52(type="text" x-model="form_data.description" rows="4")
+
+                    .modal-action
+                        button.btn.btn-primary(type="submit") Save Changes
 
 block scripts
     script.
         document.addEventListener('alpine:init', () => {
             Alpine.data('talentList', () => ({
                 talents: [],
+                emblems: [],
                 filteredTalents: [],
                 isFormOpen: false,
                 openDropdown: null,
                 isOpen: false,
                 form_data: {
+                    _id: '',
+                    name: '',
+                    tier: '',
+                    description: '',
+                    emblem: '',
+                    image: ''
                 },
                 init() {
-                    this.loadTalents()
+                    showLoading()
+
+                    const _talentsSuccess = this.loadTalents()
+                    const _emblemsSuccess = this.loadEmblems()
+
+                    hideLoading()
+                    if(!_talentsSuccess || !_emblemsSuccess){
+                        showAlert("error", "Something happened. Please try again")
+                    }
+                },
+
+                async loadEmblems(){
+                    const [error, response] = await axios.get[Symbol.result]("/dash/emblems/list", {})
+                    if(error){
+                        return false;
+                    }
+
+                    this.emblems = response.data
+
+                    return true;
                 },
 
                 async loadTalents(){
-                    showLoading()
-
                     const [error, response] = await axios.get[Symbol.result]("/dash/talents/list", {})
 
-                    hideLoading()
-
-                    if(error)
-                        return showAlert("error", "Something happened. Please try again")
+                    if(error){
+                        return false;
+                    }
 
                     this.talents = response.data
-
                     this.filteredTalents = this.talents
                     this.renderTalents()
+                    
+                    return true;
                 },
 
                 async renderTalents(){
@@ -84,25 +144,38 @@ block scripts
                     document.getElementById("talents-count").innerHTML = this.filteredTalents.length + (this.filteredTalents.length == 1 ? " talent" : " talents")
                 },
 
-                async deletetalent(talentId){
-                    showModal("Are you sure?", "The talent cannot be accessed once deleted.", "Delete", async () => {
-                        const preloader = document.getElementById("preloader")
-                        preloader.classList.remove("hidden")
-
-                        try{
-                            const response = await axios.delete(`/talents/delete/${talentId}`)
-
-                            if(response.data.success)
-                                showAlert("success", response.data.message)
-                            else
-                                showAlert("error", response.data.message)
-                        }catch (error){
-                            console.log(error.message)
-                            showAlert("error", "Something happened. Please try again")
-                        }
-
-                        await this.loadTalents()
-                    })
+                editTalent(talent) {
+                    this.form_data = { ...talent };
+                    editModal.showModal(); 
                 },
+
+                async saveTalent() {
+                    showLoading();
+                    try {
+                        const response = await axios.post(`/dash/talents/update/${this.form_data._id}`, this.form_data);
+
+                        if (response.data.success) {
+                            showAlert("success", response.data.message);
+                            editModal.close(); 
+                            await this.loadTalents(); 
+                        } else {
+                            showAlert("error", response.data.message);
+                        }
+                    } catch (error) {
+                        console.error(error.message);
+                        showAlert("error", "Something happened. Please try again");
+                    } finally {
+                        hideLoading();
+                    }
+                },
+
+
+                sortTalents(key) {
+                    this.filteredTalents.sort((a, b) => {
+                        if (a[key] < b[key]) return -1;
+                        if (a[key] > b[key]) return 1;
+                        return 0;
+                    });
+                }
             }))
         })

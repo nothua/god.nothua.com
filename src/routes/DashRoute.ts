@@ -274,6 +274,38 @@ router.post(
 
 //Update
 
+router.post(
+    "/talents/update/:id", authMiddleware, async (req: Request, res: Response) => {
+        const { id } = req.params;
+        const { name, tier, description, emblem } = req.body;
+
+        const talent = await talentRepo().get(id) as any;
+
+        if (!talent) {
+            return res.json({
+                success: false,
+                message: "Couldn't find talent",
+            });
+        }
+
+        try {
+            talent.name = name;
+            talent.tier = tier;
+            talent.emblem = emblem;
+            talent.description = description;
+
+            await talentRepo().upsert(talent);
+
+            return res.json({ success: true, message: "Talent updated" });
+        } catch (ex) {
+            return res.json({
+                success: false,
+                message: "Couldn't update talent",
+            });
+        }
+
+    })
+
 //Delete
 
 router.delete(

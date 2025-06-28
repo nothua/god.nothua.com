@@ -9,6 +9,10 @@ const schema = new Schema({
     },
     description: String,
     image: String,
+    emblem: {
+        type: Number,
+        ref: "Emblem",
+    },
 });
 
 export default model<Document>("Talent", schema);

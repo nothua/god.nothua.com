@@ -48,10 +48,6 @@ try {
         console.log("Disconnected from MongoDB");
     });
 
-    if (process.env.LOCAL != "true") {
-        sendWebhookNotification("Changes applied.");
-    }
-
     registerServicesFromDirectory();
 } catch (e) {
     console.log(e);

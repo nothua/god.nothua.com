@@ -74,7 +74,7 @@ async function getHeroes() {
  * @param {number} [days=1]
  * @returns {Promise<{ status: number, data?: any, message?: string }>}
  */
-async function getHeroesWinrate(rank = "All", days = 1) {
+async function fetchHeroesWinrate(rank = "All", days = 1) {
     try {
         const response = await axios.post(HEROES_WINRATE[days], {
             filters: [
@@ -91,10 +91,6 @@ async function getHeroesWinrate(rank = "All", days = 1) {
                 "main_hero_appearance_rate",
                 "main_hero_ban_rate",
                 "main_hero_win_rate",
-                "data.sub_hero.heroid",
-                "data.sub_hero.increase_win_rate",
-                "data.sub_hero_last.heroid",
-                "data.sub_hero_last.increase_win_rate",
             ],
         });
 
@@ -107,6 +103,41 @@ async function getHeroesWinrate(rank = "All", days = 1) {
     }
 }
 
+
+/**
+ * Fetches heroes win rate data for the given rank and time period.
+ * @param {int} [hero_id=1]
+ * @param {string} [rank="All"]
+ * @param {number} [days=7]
+ * @returns {Promise<{ status: number, data?: any, message?: string }>}
+ */
+async function fetchHeroesTrendWinrate(hero_id = 1, rank = "All", days = 7) {
+    try {
+        const response = await axios.post(HERO_TREND_WINRATES[days],
+            {
+                "pageSize": 20,
+                "pageIndex": 1,
+                "filters": [
+                    { "field": "main_heroid", "operator": "eq", "value": hero_id },
+                    { "field": "bigrank", "operator": "eq", "value": RANKS[rank] },
+                    { "field": "match_type", "operator": "eq", "value": 1 }
+                ],
+                "sorts": []
+            }
+        );
+
+        return { status: 200, data: response.data };
+    } catch (error) {
+
+        console.log(error);
+        return {
+            status: error.response?.status || 500,
+            message: error.response?.data?.message || error.message,
+        };
+    }
+}
+
+
 /**
  * Combines hero data with their win rates, pick rates, and ban rates.
  * It fetches all heroes and their winrate statistics for a given rank and time period,
@@ -118,7 +149,7 @@ async function getHeroesWinrate(rank = "All", days = 1) {
  * A promise that resolves to an object containing the status,
  * the combined hero data (if successful), or an error message.
  */
-async function combineHeroData(rank = "All", days = 1) {
+async function getHeroesWinrate(rank = "All", days = 1) {
     try {
         const heroesResponse = await getHeroes();
         if (heroesResponse.status !== 200) {
@@ -130,7 +161,7 @@ async function combineHeroData(rank = "All", days = 1) {
 
         const heroes = heroesResponse.data;
 
-        const winrateResponse = await getHeroesWinrate(rank, days);
+        const winrateResponse = await fetchHeroesWinrate(rank, days);
         if (winrateResponse.status !== 200) {
             return {
                 status: winrateResponse.status,
@@ -169,5 +200,38 @@ async function combineHeroData(rank = "All", days = 1) {
             status: 500,
             message: `An unexpected error occurred: ${error.message}`,
         };
+    }
+}
+
+
+/**
+ * Parses the response from fetchHeroesTrendWinrate into a format suitable for charting.
+ * It extracts the daily win rate, pick rate (appearance rate), and ban rate data.
+ *
+ * @param {Object} responseData - The raw response data object from fetchHeroesTrendWinrate.
+ * @returns {Array<Object>} An array of objects, where each object represents a daily trend
+ * with 'date', 'win_rate', 'pick_rate', and 'ban_rate' properties.
+ * Returns an empty array if the data structure is not as expected.
+ */
+function parseHeroTrendWinrateForChart(responseData) {
+    if (
+        responseData &&
+        responseData.data &&
+        responseData.data.records &&
+        responseData.data.records.length > 0 &&
+        responseData.data.records[0].data &&
+        responseData.data.records[0].data.win_rate
+    ) {
+        const trendData = responseData.data.records[0].data.win_rate;
+
+        return trendData.map(dayData => ({
+            date: dayData.date,
+            win_rate: dayData.win_rate,
+            pick_rate: dayData.app_rate,
+            ban_rate: dayData.ban_rate,
+        }));
+    } else {
+        console.warn("Invalid or empty responseData for parsing hero trend winrate.");
+        return [];
     }
 }

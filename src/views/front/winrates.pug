@@ -100,7 +100,6 @@ html(lang="en")
                                     button(
                                         @click="showHeroTrend(hero)"
                                         class="bg-green-500 text-white px-2 py-1 rounded text-sm"
-                                        x-show="false" 
                                     ) Trends
                                     button(
                                         @click="compareHero(hero)"
@@ -137,28 +136,28 @@ html(lang="en")
                     // Tabs for Charts
                     div(class="flex border-b border-gray-700 mb-4")
                         button(
-                            @click="activeTrendTab = 'winrate'"
-                            :class="{ 'border-b-2 border-blue-500 text-blue-400': activeTrendTab === 'winrate', 'text-gray-400 hover:text-white': activeTrendTab !== 'winrate' }"
+                            @click="activeTrendTab = 'win_rate'"
+                            :class="{ 'border-b-2 border-blue-500 text-blue-400': activeTrendTab === 'win_rate', 'text-gray-400 hover:text-white': activeTrendTab !== 'win_rate' }"
                             class="py-2 px-4 focus:outline-none"
                         ) Winrate
                         button(
-                            @click="activeTrendTab = 'pickrate'"
-                            :class="{ 'border-b-2 border-orange-500 text-orange-400': activeTrendTab === 'pickrate', 'text-gray-400 hover:text-white': activeTrendTab !== 'pickrate' }"
+                            @click="activeTrendTab = 'pick_rate'"
+                            :class="{ 'border-b-2 border-orange-500 text-orange-400': activeTrendTab === 'pick_rate', 'text-gray-400 hover:text-white': activeTrendTab !== 'pick_rate' }"
                             class="py-2 px-4 focus:outline-none"
                         ) Pickrate
                         button(
-                            @click="activeTrendTab = 'banrate'"
-                            :class="{ 'border-b-2 border-red-500 text-red-400': activeTrendTab === 'banrate', 'text-gray-400 hover:text-white': activeTrendTab !== 'banrate' }"
+                            @click="activeTrendTab = 'ban_rate'"
+                            :class="{ 'border-b-2 border-red-500 text-red-400': activeTrendTab === 'ban_rate', 'text-gray-400 hover:text-white': activeTrendTab !== 'ban_rate' }"
                             class="py-2 px-4 focus:outline-none"
                         ) Banrate
 
                     // Chart Containers (hidden/shown by active tab)
                     div(class="relative h-64")
-                        div(x-show="activeTrendTab === 'winrate'" x-transition:enter.duration.300ms)
+                        div(x-show="activeTrendTab === 'win_rate'" x-transition:enter.duration.300ms).h-64
                             canvas(id="winrateTrendChart")
-                        div(x-show="activeTrendTab === 'pickrate'" x-transition:enter.duration.300ms)
+                        div(x-show="activeTrendTab === 'pick_rate'" x-transition:enter.duration.300ms).h-64
                             canvas(id="pickrateTrendChart")
-                        div(x-show="activeTrendTab === 'banrate'" x-transition:enter.duration.300ms)
+                        div(x-show="activeTrendTab === 'ban_rate'" x-transition:enter.duration.300ms).h-64
                             canvas(id="banrateTrendChart")
 
                     button(
@@ -232,33 +231,22 @@ html(lang="en")
                     compareRank: 'All',
                     compareDateRange: '7',
                     comparisonResults: null,
-                    latestDate: null,
                     winrateTrendChartInstance: null,
                     pickrateTrendChartInstance: null,
                     banrateTrendChartInstance: null,
+                    trendRange: "7",
+                    trendRank: "All",
 
                     init() {
                         this.fetchHeroStats();
-                        this.findLatestStat();
-                    },
-
-                    async findLatestStat(){
-                        try {
-                            const response = await fetch('/api/hero-stats/latest', {
-                                method: 'GET',
-                                headers: { 'Content-Type': 'application/json' },
-                            });
-                            const latestStat = await response.json();
-                            this.latestDate = new Date(latestStat.date);
-                        } catch (error) {
-                            console.error('Failed to fetch latest stat:', error);
-                            this.latestDate = null;
-                        }
                     },
 
                     async fetchHeroStats() {
-                        const response = await combineHeroData(this.rank, this.dateRange)
+                        const response = await getHeroesWinrate(this.rank, this.dateRange)
 
+                        console.log(await fetchHeroesTrendWinrate(1, this.rank, 7) )
+                        console.log("doesnt work");
+                        
                         if(response.status == 200){
                             this.heroStats = response.data;
                         }else{
@@ -284,21 +272,24 @@ html(lang="en")
 
                     async showHeroTrend(hero) {
                         try {
-                            const response = await fetch(`/api/hero-trend/${hero._id}`, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    rank: this.rank,
-                                    dateRange: this.dateRange
-                                })
-                            });
-                            const trendData = await response.json();
+                            const response = await fetchHeroesTrendWinrate(hero._id, this.trendRank, this.trendRange);
 
-                            if (trendData.length === 0) {
-                                console.warn('No trend data available for this hero in the selected range.');
+                            if (response.status !== 200 || !response.data) {
+                                console.warn('Failed to fetch hero trend data:', response.message);
                                 this.selectedHeroTrend = { ...hero, winrateChange: 0, pickrateChange: 0, banrateChange: 0 };
                                 this.$nextTick(() => {
-                                    this.destroyTrendCharts(); 
+                                    this.destroyTrendCharts();
+                                });
+                                return;
+                            }
+
+                            const trendData = parseHeroTrendWinrateForChart(response.data);
+
+                            if (trendData.length === 0) {
+                                console.warn('No trend data available for this hero in the selected range after parsing.');
+                                this.selectedHeroTrend = { ...hero, winrateChange: 0, pickrateChange: 0, banrateChange: 0 };
+                                this.$nextTick(() => {
+                                    this.destroyTrendCharts();
                                 });
                                 return;
                             }
@@ -308,9 +299,9 @@ html(lang="en")
                             const latestStat = trendData[trendData.length - 1];
                             const earliestStat = trendData[0];
 
-                            const winrateChange = (latestStat.winrate || 0) - (earliestStat.winrate || 0);
-                            const pickrateChange = (latestStat.pickrate || 0) - (earliestStat.pickrate || 0);
-                            const banrateChange = (latestStat.banrate || 0) - (earliestStat.banrate || 0);
+                            const winrateChange = (latestStat.win_rate * 100  || 0) - (earliestStat.win_rate * 100  || 0);
+                            const pickrateChange = (latestStat.pick_rate * 100  || 0) - (earliestStat.pick_rate * 100  || 0);
+                            const banrateChange = (latestStat.ban_rate * 100  || 0) - (earliestStat.ban_rate * 100  || 0);
 
                             this.selectedHeroTrend = {
                                 ...hero,
@@ -319,10 +310,16 @@ html(lang="en")
                                 banrateChange: banrateChange,
                             };
 
-                            const dates = trendData.map(stat => new Date(stat.date).toLocaleDateString());
-                            const winrates = trendData.map(stat => stat.winrate || 0);
-                            const pickrates = trendData.map(stat => stat.pickrate || 0);
-                            const banrates = trendData.map(stat => stat.banrate || 0);
+                            const dates = trendData.map(stat => {
+                                const d = new Date(stat.date);
+                                const day = String(d.getDate()).padStart(2, '0');
+                                const month = String(d.getMonth() + 1).padStart(2, '0');
+                                const year = d.getFullYear();
+                                return `${day}/${month}/${year}`;
+                            });
+                            const winrates = trendData.map(stat => stat.win_rate * 100 || 0);
+                            const pickrates = trendData.map(stat => stat.pick_rate * 100 || 0);
+                            const banrates = trendData.map(stat => stat.ban_rate * 100 || 0);
 
                             this.$nextTick(() => {
                                 this.destroyTrendCharts();
@@ -376,8 +373,8 @@ html(lang="en")
                                 });
                             });
                         } catch (error) {
-                            console.error('Failed to fetch hero trend:', error);
-                            this.selectedHeroTrend = null; 
+                            console.error('Failed to show hero trend:', error);
+                            this.selectedHeroTrend = null;
                             this.destroyTrendCharts();
                         }
                     },

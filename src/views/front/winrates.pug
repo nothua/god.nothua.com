@@ -166,17 +166,21 @@ html(lang="en").bg-gray-950
             div(
                 x-show="selectedHeroTrend"
                 x-cloak
-                class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4" 
+                class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-2" 
                 @click.away="closeHeroTrendModal()" 
             )
-                div(class="bg-gray-900 p-8 rounded-xl shadow-2xl w-11/12 max-w-5xl border-2 border-blue-600 animate-fade-in")
-                    h2(
-                        class="text-2xl font-bold mb-6 text-white font-orbitron"
-                        x-text="selectedHeroTrend ? selectedHeroTrend.name: ''" 
-                    )
+                div(class="bg-gray-900 p-6 rounded-xl shadow-2xl w-11/12 max-w-5xl border-2 border-blue-600 animate-fade-in")
+                
+                    div(class="flex justify-between items-center mb-4")
+                        h2(
+                            class="text-2xl font-bold text-white font-orbitron"
+                            x-text="selectedHeroTrend ? selectedHeroTrend.name: ''"
+                        )
+                        button.btn.btn-ghost(@click="closeHeroTrendModal()") 
+                            i.fas.fa-times
                         
                     // Filters
-                    div(class="flex flex-wrap space-x-4 mb-6")
+                    div(class="flex flex-wrap space-x-4 mb-4")
                         div
                             label(for="trend-rank-select" class="block text-sm font-medium text-gray-300 mb-1") Rank
                             select(
@@ -204,48 +208,48 @@ html(lang="en").bg-gray-950
                                 option(value="15") Last 15 Days
                                 option(value="30") Last 30 Days
 
-                    div(class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8") 
-                        div(class="bg-gray-800 p-6 rounded-lg shadow-inner border border-gray-700 text-center")
-                            h3(class="font-bold mb-2 text-gray-200 text-xl") Winrate Change
+                    div(class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4") 
+                        div(class="bg-gray-800 p-4 rounded-lg shadow-inner border border-gray-700 text-center")
+                            h3(class="font-bold mb-2 text-gray-200 text-md") Winrate Change
                             p(:class="{'text-green-400': selectedHeroTrend && selectedHeroTrend.winrateChange >= 0, 'text-red-400': selectedHeroTrend && selectedHeroTrend.winrateChange < 0}"
-                               class="text-3xl font-extrabold font-mono")
+                               class="text-1xl font-extrabold font-mono")
                                 i(class="mr-2" :class="{'fas fa-arrow-up': selectedHeroTrend && selectedHeroTrend.winrateChange >= 0, 'fas fa-arrow-down': selectedHeroTrend && selectedHeroTrend.winrateChange < 0}")
                                 span(x-text="selectedHeroTrend ? `${selectedHeroTrend.winrateChange >= 0 ? '+' : ''}${selectedHeroTrend.winrateChange.toFixed(2)}%` : '-'")
                             p(class="text-gray-400 text-sm mt-1") (Last #[span(x-text="trendRange")] days)
 
-                        div(class="bg-gray-800 p-6 rounded-lg shadow-inner border border-gray-700 text-center")
-                            h3(class="font-bold mb-2 text-gray-200 text-xl") Pickrate Change
+                        div(class="bg-gray-800 p-4 rounded-lg shadow-inner border border-gray-700 text-center")
+                            h3(class="font-bold mb-2 text-gray-200 text-md") Pickrate Change
                             p(:class="{'text-green-400': selectedHeroTrend && selectedHeroTrend.pickrateChange >= 0, 'text-red-400': selectedHeroTrend && selectedHeroTrend.pickrateChange < 0}"
-                               class="text-3xl font-extrabold font-mono")
+                               class="text-1xl font-extrabold font-mono")
                                 i(class="mr-2" :class="{'fas fa-arrow-up': selectedHeroTrend && selectedHeroTrend.pickrateChange >= 0, 'fas fa-arrow-down': selectedHeroTrend && selectedHeroTrend.pickrateChange < 0}")
                                 span(x-text="selectedHeroTrend ? `${selectedHeroTrend.pickrateChange >= 0 ? '+' : ''}${selectedHeroTrend.pickrateChange.toFixed(2)}%` : '-'")
                             p(class="text-gray-400 text-sm mt-1") (Last #[span(x-text="trendRange")] days)
 
-                        div(class="bg-gray-800 p-6 rounded-lg shadow-inner border border-gray-700 text-center")
-                            h3(class="font-bold mb-2 text-gray-200 text-xl") Banrate Change
+                        div(class="bg-gray-800 p-4 rounded-lg shadow-inner border border-gray-700 text-center")
+                            h3(class="font-bold mb-2 text-gray-200 text-md") Banrate Change
                             p(:class="{'text-green-400': selectedHeroTrend && selectedHeroTrend.banrateChange >= 0, 'text-red-400': selectedHeroTrend && selectedHeroTrend.banrateChange < 0}"
-                               class="text-3xl font-extrabold font-mono")
+                               class="text-1xl font-extrabold font-mono")
                                 i(class="mr-2" :class="{'fas fa-arrow-up': selectedHeroTrend && selectedHeroTrend.banrateChange >= 0, 'fas fa-arrow-down': selectedHeroTrend && selectedHeroTrend.banrateChange < 0}")
                                 span(x-text="selectedHeroTrend ? `${selectedHeroTrend.banrateChange >= 0 ? '+' : ''}${selectedHeroTrend.banrateChange.toFixed(2)}%` : '-'")
                             p(class="text-gray-400 text-sm mt-1") (Last #[span(x-text="trendRange")] days)
 
 
                     // Tabs for Charts
-                    div(class="flex border-b-2 border-gray-700 mb-6")
+                    div(class="flex border-b-2 border-gray-700 mb-2")
                         button(
                             @click="activeTrendTab = 'win_rate'"
                             :class="{ 'border-blue-500 text-blue-400 font-bold bg-gray-800': activeTrendTab === 'win_rate', 'text-gray-400 hover:text-white hover:bg-gray-700': activeTrendTab !== 'win_rate' }"
-                            class="py-3 px-6 focus:outline-none transition-colors duration-200 rounded-t-lg text-lg" 
+                            class="py-3 px-6 focus:outline-none transition-colors duration-200 rounded-t-lg text-md" 
                         ) Winrate
                         button(
                             @click="activeTrendTab = 'pick_rate'"
                             :class="{ 'border-orange-500 text-orange-400 font-bold bg-gray-800': activeTrendTab === 'pick_rate', 'text-gray-400 hover:text-white hover:bg-gray-700': activeTrendTab !== 'pick_rate' }"
-                            class="py-3 px-6 focus:outline-none transition-colors duration-200 rounded-t-lg text-lg"
+                            class="py-3 px-6 focus:outline-none transition-colors duration-200 rounded-t-lg text-md"
                         ) Pickrate
                         button(
                             @click="activeTrendTab = 'ban_rate'"
                             :class="{ 'border-red-500 text-red-400 font-bold bg-gray-800': activeTrendTab === 'ban_rate', 'text-gray-400 hover:text-white hover:bg-gray-700': activeTrendTab !== 'ban_rate' }"
-                            class="py-3 px-6 focus:outline-none transition-colors duration-200 rounded-t-lg text-lg"
+                            class="py-3 px-6 focus:outline-none transition-colors duration-200 rounded-t-lg text-md"
                         ) Banrate
 
                     // Chart Containers
@@ -257,15 +261,10 @@ html(lang="en").bg-gray-950
                         div(x-show="activeTrendTab === 'ban_rate'" x-transition:enter.duration.300ms class="h-full")
                             canvas(id="banrateTrendChart")
 
-                    button(
-                        @click="closeHeroTrendModal()"
-                        class="mt-8 bg-red-700 text-white px-6 py-3 rounded-lg text-lg font-bold w-full shadow-lg hover:bg-red-800 transition duration-200 btn-glow-red" 
-                    ) Close
-
             div(
                 x-show="comparedHero"
                 x-cloak
-                class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4"
+                class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-30 p-4"
                 @click.away="comparedHero = null"
             )
                 div(class="bg-gray-900 p-8 rounded-xl shadow-2xl w-11/12 max-w-4xl border-2 border-green-600")
@@ -274,7 +273,7 @@ html(lang="en").bg-gray-950
                         x-text="comparedHero ? 'Compare ' + comparedHero.name : ''"
                     )
                     // Comparison Filters (similar styling as above)
-                    div(class="flex flex-wrap justify-center space-x-4 mb-6")
+                    div(class="flex flex-wrap justify-center space-x-4 mb-4")
                         div
                             label(for="compare-rank-select" class="block text-sm font-medium text-gray-300 mb-1") Rank
                             select(id="compare-rank-select" x-model="compareRank" class="bg-gray-700 text-white p-2 rounded-md input-glow")
@@ -331,7 +330,7 @@ html(lang="en").bg-gray-950
                     ) Close
 
         
-        div#preloader.fixed.inset-0.flex.items-center.justify-center.bg-gray-900.bg-opacity-75.z-40.hidden
+        div#preloader.fixed.inset-0.flex.items-center.justify-center.bg-gray-900.bg-opacity-75.z-50.hidden
             div.flex.space-x-2
                 div.w-4.h-4.bg-blue-500.rounded-full.animate-bounce
                 div.w-4.h-4.bg-blue-500.rounded-full.animate-bounce.delay-200
@@ -340,6 +339,7 @@ html(lang="en").bg-gray-950
         script(src="/js/alpine.js" defer)
         script(src="/js/axios.js")
         script(src="/js/mlbb_api.js")
+        script(src="/js/script.js")
         script.
             function heroStatsData() {
                 return {
@@ -369,6 +369,7 @@ html(lang="en").bg-gray-950
                     },
 
                     async fetchHeroStats() {
+                        showLoading();
                         try {
                             const response = await getHeroesWinrate(this.rank, this.dateRange);
                             if (response.status === 200) {
@@ -380,6 +381,8 @@ html(lang="en").bg-gray-950
                         } catch (error) {
                             console.error('Error fetching hero stats:', error);
                             this.heroStats = []; 
+                        } finally {
+                            hideLoading();
                         }
                     },
 
@@ -407,6 +410,7 @@ html(lang="en").bg-gray-950
                     },
 
                     async showHeroTrend(hero) {
+                        showLoading();
                         try {
                             this.selectedHeroTrend = { ...hero, winrateChange: 0, pickrateChange: 0, banrateChange: 0 };
                             this.destroyTrendCharts(); 
@@ -524,6 +528,8 @@ html(lang="en").bg-gray-950
                             console.error('Failed to show hero trend:', error);
                             this.selectedHeroTrend = { ...hero, winrateChange: 0, pickrateChange: 0, banrateChange: 0 }; 
                             this.destroyTrendCharts();
+                        } finally {
+                            hideLoading();
                         }
                     },
 

@@ -53,8 +53,11 @@ const schema = new Schema({
         },
     ],
     date: {
-        type: Number,
-        default: Date.now(),
+        type: String,
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now,
     },
 });
 
@@ -71,12 +74,12 @@ export interface IStat {
             winrate: number;
         }>;
     }>;
-    date: number;
+    date: String;
 }
 
 export interface SimplifiedHeroTrend {
     hero: number;
-    date: number;
+    date: String;
     pickrate: number;
     winrate: number;
     banrate: number;

@@ -8,5 +8,5 @@ import { fetchEmblems, fetchTalents, updateEmblems, updateTalents } from "./scri
 Mongoose.connect(process.env.MONGO_URI || "");
 
 registerServicesFromDirectory().then(async () => {
-  await updateTalents();
+  await updateDailyWinrate();
 })

@@ -1,7 +1,7 @@
 import { Model, Document } from "mongoose";
 
 class BaseRepository<T extends Document> {
-    constructor(public model: Model<T>) {}
+    constructor(public model: Model<T>) { }
 
     async create(data: Partial<T>): Promise<T> {
         const newDocument = new this.model(data);
@@ -20,9 +20,19 @@ class BaseRepository<T extends Document> {
         return this.model.find();
     }
 
+    async getAllAndSelect(select: string): Promise<T[]> {
+        return this.model.find().select(select);
+    }
+
+
     async get(id: string): Promise<T | null> {
         if (id == "null" || !id) return null;
         return this.model.findById(id);
+    }
+
+    async getAndSelect(id: string, select: string): Promise<T | null> {
+        if (id == "null" || !id) return null;
+        return this.model.findById(id).select(select);
     }
 
     async getByField(field: string, value: string): Promise<T | null> {

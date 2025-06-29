@@ -9,14 +9,19 @@ const schema = new Schema({
         },
     },
     time: String,
-    emblem: [
+    start: String,
+    talents: [
         {
-            emblem: {
+            talent: {
                 type: Number,
-                ref: "Emblem",
+                ref: "Talent",
             },
         },
     ],
+    emblem: {
+        type: Number,
+        ref: "Emblem",
+    },
 });
 
 export default model<Document>("JungleSpeed", schema);

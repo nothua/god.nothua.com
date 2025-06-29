@@ -9,7 +9,7 @@ html(lang="en")
     body(x-data="heroStatsData()" x-init="init()" class="bg-gray-900 text-white")
         div(class="container mx-auto px-4 py-8")
             // Header
-            h1(class="text-3xl font-bold mb-6") Hero Performance Stats
+            h1(class="text-2xl font-bold mb-6") Hero Performance Stats
 
             // Filters and Search
             div(class="flex space-x-4 mb-6")
@@ -35,11 +35,8 @@ html(lang="en")
                     option(value="1") Last Day
                     option(value="3") Last 3 Days
                     option(value="7") Last 7 Days
-                    option(value="14") Last 14 Days
+                    option(value="15") Last 15 Days
                     option(value="30") Last 30 Days
-                    option(value="90") Last 90 Days
-
-                p(x-text="`Last Updated at: ${latestDate ? latestDate.toLocaleString() : 'N/A'}`" class="ml-4 mt-2")
 
             // Hero Stats Table
             div(class="bg-gray-800 rounded-lg overflow-hidden")
@@ -57,53 +54,53 @@ html(lang="en")
                                 )
                             th(
                                 class="p-3 cursor-pointer"
-                                @click="sortBy('winrate')"
+                                @click="sortBy('win_rate')"
                             )
                                 | Winrate
                                 i(
                                     class="fas ml-2"
-                                    :class="sortKey === 'winrate' ? (sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'"
+                                    :class="sortKey === 'win_rate' ? (sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'"
                                 )
                             th(
                                 class="p-3 cursor-pointer"
-                                @click="sortBy('pickrate')"
+                                @click="sortBy('pick_rate')"
                             )
                                 | Pickrate
                                 i(
                                     class="fas ml-2"
-                                    :class="sortKey === 'pickrate' ? (sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'"
+                                    :class="sortKey === 'pick_rate' ? (sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'"
                                 )
                             th(
                                 class="p-3 cursor-pointer"
-                                @click="sortBy('banrate')"
+                                @click="sortBy('ban_rate')"
                             )
                                 | Banrate
                                 i(
                                     class="fas ml-2"
-                                    :class="sortKey === 'banrate' ? (sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'"
+                                    :class="sortKey === 'ban_rate' ? (sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'"
                                 )
-                            th(class="p-3") Actions
+                            th(class="p-3") 
 
                     tbody
-                        template(x-for="hero in sortedHeroes" :key="hero.id")
+                        template(x-for="hero in sortedHeroes" :key="hero._id")
                             tr(class="border-b border-gray-700 hover:bg-gray-700")
                                 td(class="p-3 flex items-center")
                                     img(
-                                        :src="hero.avatar"
+                                        :src="hero.thumbnail"
                                         class="w-10 h-10 rounded-full mr-3"
                                     )
                                     span(x-text="hero.name")
                                 td(class="p-3")
-                                    span(x-text="`${hero.winrate.toFixed(2)}%`")
+                                    span(x-text="`${hero.win_rate.toFixed(2)}%`")
                                 td(class="p-3")
-                                    span(x-text="`${hero.pickrate.toFixed(2)}%`")
+                                    span(x-text="`${hero.pick_rate.toFixed(2)}%`")
                                 td(class="p-3")
-                                    span(x-text="`${hero.banrate.toFixed(2)}%`")
+                                    span(x-text="`${hero.ban_rate.toFixed(2)}%`")
                                 td(class="p-3 space-x-2")
                                     button(
                                         @click="showHeroTrend(hero)"
                                         class="bg-green-500 text-white px-2 py-1 rounded text-sm"
-                                        x-show="parseInt(dateRange) > 1"
+                                        x-show="false" 
                                     ) Trends
                                     button(
                                         @click="compareHero(hero)"
@@ -219,16 +216,18 @@ html(lang="en")
                     ) Close
 
         script(src="/js/alpine.js" defer)
+        script(src="/js/axios.js")
+        script(src="/js/mlbb_api.js")
         script.
             function heroStatsData() {
                 return {
                     heroStats: [],
                     rank: 'All',
-                    dateRange: '7',
-                    sortKey: 'winrate', 
+                    dateRange: '1',
+                    sortKey: 'win_rate', 
                     sortDirection: 'desc',
                     selectedHeroTrend: null,
-                    activeTrendTab: 'winrate',
+                    activeTrendTab: 'win_rate',
                     comparedHero: null,
                     compareRank: 'All',
                     compareDateRange: '7',
@@ -258,19 +257,12 @@ html(lang="en")
                     },
 
                     async fetchHeroStats() {
-                        try {
-                            const response = await fetch('/api/hero-stats', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    rank: this.rank,
-                                    dateRange: this.dateRange
-                                })
-                            });
-                            this.heroStats = await response.json();
-                        } catch (error) {
+                        const response = await combineHeroData(this.rank, this.dateRange)
+
+                        if(response.status == 200){
+                            this.heroStats = response.data;
+                        }else{
                             console.error('Failed to fetch hero stats:', error);
-                            this.heroStats = []; 
                         }
                     },
 
@@ -292,7 +284,7 @@ html(lang="en")
 
                     async showHeroTrend(hero) {
                         try {
-                            const response = await fetch(`/api/hero-trend/${hero.id}`, {
+                            const response = await fetch(`/api/hero-trend/${hero._id}`, {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({
@@ -459,7 +451,7 @@ html(lang="en")
 
                     async performComparison() {
                         try {
-                            const response = await fetch(`/api/hero-compare/${this.comparedHero.id}`, {
+                            const response = await fetch(`/api/hero-compare/${this.comparedHero._id}`, {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({

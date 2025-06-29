@@ -1,0 +1,177 @@
+extends ../_layout
+
+block content
+    section.container.mx-auto(x-data="talentList")
+        div(class="sm:flex sm:items-center sm:justify-between")
+            div
+                .flex.items-center.gap-x-3
+                    h2.text-lg.font-medium.text-gray-800(class="dark:text-white") Jungle Speed
+                    span.px-3.py-1.text-xs.text-blue-600.bg-blue-100.rounded-full(class="dark:bg-gray-800 dark:text-blue-400")#entries-count 200 entries
+
+        .hidden.flex.items-center.mt-6.text-center.border.rounded-lg.h-96(class="dark:border-gray-700")#no-entries
+            .flex.flex-col.w-full.max-w.sm.px-4.mx-auto
+                .p-3.mx-auto.text-blue-500.bg-blue-100.rounded-full(class="dark:bg-gray-800")
+                    i.w-6.h-6.fas.fa-search
+                h1.mt-3.text-lg.text-gray-800(class="dark:text-white") No entries found
+                p.mt-2.text-gray-500(class="dark:text-gray-400") Please try again
+
+        .flex.flex-col.mt-6.min-h-96#entries-table-layout
+            .overflow-x-auto(class="-my-2 md:-mx-6 lg:-mx-8")
+                .inline-block.min-w-full.py-2.align-middle(class="md:px-6 lg:px-8")
+                    .overflow-hidden.border.border-gray-200(class="dark:border-gray-700 md:rounded-lg")
+                        table.min-w-full.divide-y.divide-gray-200(class="dark:divide-gray-700")#entries-table
+                            thead.bg-gray-50(class="dark:bg-gray-800")
+                                tr
+                                    th(class="py-3.5 rtl:text-right dark:text-gray-400" width="100" scope="col").px-4.text-sm.font-small.text-left.text-gray-500
+                                        span(style="visibility:hidden") Image
+                                    th(class="rtl:text-right dark:text-gray-400 py-3.5" scope="col").text-sm.font-small.text-left.text-gray-500
+                                        button.flex.items-center.gap-x-3(class="focus:outline-none" @click="sortTalents('name')")
+                                            span Name
+                                    th(class="rtl:text-right dark:text-gray-400 py-3.5" scope="col").px-12.text-sm.font-small.text-left.text-gray-500
+                                        span Tier
+                                    th(class="rtl:text-right dark:text-gray-400 py-3.5" scope="col").px-12.text-sm.font-small.text-left.text-gray-500
+                                        span Description
+                                    th(class="rtl:text-right dark:text-gray-400 py-3.5" scope="col").px-12.text-sm.font-small.text-left.text-gray-500
+                            tbody.bg-white.divide-y.divide-gray-200(class="dark:divide-gray-700 dark:bg-gray-900")
+                                template(x-for="talent in filteredTalents" :key="talent._id")
+                                    tr
+                                        td.text-sm.font-medium.whitespace-nowrap.text-gray-800.px-4(class="dark:text-white")
+                                            img(:src="talent.image" alt="talent" class="w-10 h-10 rounded-full")
+                                        td.text-sm.font-medium.whitespace-nowrap.text-gray-800(class="dark:text-white" x-text="talent.name")
+                                        td.px-12.py-4.text-sm.font-medium.whitespace-nowrap.text-gray-800(class="dark:text-white" x-text="talent.tier")
+                                        td.px-12.py-4.text-sm
+                                            p(x-html="talent.description.replaceAll('\\n', '<br>')")
+                                        td.px-12.py-4.text-sm.whitespace-nowrap
+                                            btn.btn.btn-ghost.text-gray-500.transition-colors.duration-200(class="dark:hover:text-blue-500 dark:text-gray-300 hover:text-blue-500 focus:outline-none" @click="editTalent(talent)").w-12.text-center Edit
+
+        dialog.modal#editModal
+            .modal-box
+                form(method="dialog" @submit.prevent="saveTalent")
+                    button.btn.btn-sm.btn-circle.btn-ghost.absolute.right-2.top-2(type="button" @click="editModal.close()") X
+                    h3.text-lg.font-bold Edit Talent
+                    .py-4.grid.grid-cols-2.gap-x-6
+                        .mb-4
+                            fieldset.fieldset.w-full
+                                legend.fieldset-legend Name
+                                input.input.w-full.mt-2.input-primary(type="text" x-model="form_data.name" )
+                        .mb-4
+                            fieldset.fieldset.w-full
+                                legend.fieldset-legend Tier
+                                select.select.w-full.mt-2.select-primary(x-model="form_data.tier")
+                                    option(value="1") 1
+                                    option(value="2") 2
+                                    option(value="3") 3
+
+                        .mb-4.col-span-2
+                            fieldset.fieldset.w-full
+                                legend.fieldset-legend Emblem
+                                select.select.w-full.mt-2.select-primary(x-model="form_data.emblem")
+                                    option(value="" disabled) Select Emblem
+                                    template(x-for="emblem in emblems" :key="emblem._id")
+                                        option(:value="emblem._id" x-html="emblem.name")
+
+                        .mb-4.col-span-2
+                            fieldset.fieldset.w-full
+                                legend.fieldset-legend Description
+                                textarea.input.w-full.mt-2.input-primary.pt-4.h-52(type="text" x-model="form_data.description" rows="4")
+
+                    .modal-action
+                        button.btn.btn-primary(type="submit") Save Changes
+
+block scripts
+    script.
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('talentList', () => ({
+                talents: [],
+                emblems: [],
+                filteredTalents: [],
+                isFormOpen: false,
+                openDropdown: null,
+                isOpen: false,
+                form_data: {
+                    _id: '',
+                    name: '',
+                    tier: '',
+                    description: '',
+                    emblem: '',
+                    image: ''
+                },
+                init() {
+                    showLoading()
+
+                    const _entriesSuccess = this.loadTalents()
+                    const _emblemsSuccess = this.loadEmblems()
+
+                    hideLoading()
+                    if(!_entriesSuccess || !_emblemsSuccess){
+                        showAlert("error", "Something happened. Please try again")
+                    }
+                },
+
+                async loadEmblems(){
+                    const [error, response] = await axios.get[Symbol.result]("/dash/emblems/list", {})
+                    if(error){
+                        return false;
+                    }
+
+                    this.emblems = response.data
+
+                    return true;
+                },
+
+                async loadTalents(){
+                    const [error, response] = await axios.get[Symbol.result]("/dash/talents/list", {})
+
+                    if(error){
+                        return false;
+                    }
+
+                    this.talents = response.data
+                    return true;
+                },
+
+                async renderTalents(){
+                    if(this.filteredTalents.length > 0){
+                        document.getElementById("entries-table-layout").classList.remove("hidden")
+                        document.getElementById("no-entries").classList.add("hidden")
+                    }else{
+                        document.getElementById("entries-table-layout").classList.add("hidden")
+                        document.getElementById("no-entries").classList.remove("hidden")
+                    }
+                    document.getElementById("entries-count").innerHTML = this.filteredTalents.length + (this.filteredTalents.length == 1 ? " entry" : " entries")
+                },
+
+                editTalent(talent) {
+                    this.form_data = { ...talent };
+                    editModal.showModal(); 
+                },
+
+                async saveTalent() {
+                    showLoading();
+                    try {
+                        const response = await axios.post(`/dash/entries/update/${this.form_data._id}`, this.form_data);
+
+                        if (response.data.success) {
+                            showAlert("success", response.data.message);
+                            editModal.close(); 
+                            await this.loadTalents(); 
+                        } else {
+                            showAlert("error", response.data.message);
+                        }
+                    } catch (error) {
+                        console.error(error.message);
+                        showAlert("error", "Something happened. Please try again");
+                    } finally {
+                        hideLoading();
+                    }
+                },
+
+                sortTalents(key) {
+                    this.filteredTalents.sort((a, b) => {
+                        if (a[key] < b[key]) return -1;
+                        if (a[key] > b[key]) return 1;
+                        return 0;
+                    });
+                }
+            }))
+        })

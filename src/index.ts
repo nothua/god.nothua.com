@@ -49,7 +49,7 @@ try {
     });
 
     if (process.env.LOCAL != "true") {
-        sendWebhookNotification("Changea applied.");
+        sendWebhookNotification("Changes applied.");
     }
 
     registerServicesFromDirectory();

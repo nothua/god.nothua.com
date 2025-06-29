@@ -167,6 +167,19 @@ router.post("/hero-stats", async (req: Request, res: Response) => {
     }
 });
 
+router.get("/heroes/list", async (req: Request, res: Response) => {
+    try {
+        const heroes = await heroRepo().getAllAndSelect("_id name thumbnail");
+        res.json(heroes);
+    } catch (error: any) {
+        console.error("Failed to fetch heroes:", error);
+        res.status(500).json({
+            message: "Failed to fetch heroes",
+            error: error.message,
+        });
+    }
+})
+
 router.get("/hero-stats/latest", async (req: Request, res: Response) => {
     try {
         const stat = await statRepo().getLatest();

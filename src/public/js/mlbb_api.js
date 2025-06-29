@@ -42,10 +42,11 @@ const HEROES_WINRATE = {
  * // Get the 15-day heroes trend win rate URL
  * const url = HERO_TREND_WINRATES[15];
  */
+
 const HERO_TREND_WINRATES = {
-    7: `${base_url}/2713644/2755185`,
-    15: `${base_url}/2713644/2755186`,
-    30: `${base_url}/2713644/2755187`,
+    7: `${base_url}/2669606/2674709`,
+    15: `${base_url}/2669606/2687909`,
+    30: `${base_url}/2669606/2690860`,
 }
 
 const HERO_WINRATE = `${base_url}/2713644/2777391`;

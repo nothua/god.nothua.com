@@ -244,9 +244,6 @@ html(lang="en")
                     async fetchHeroStats() {
                         const response = await getHeroesWinrate(this.rank, this.dateRange)
 
-                        console.log(await fetchHeroesTrendWinrate(1, this.rank, 7) )
-                        console.log("doesnt work");
-                        
                         if(response.status == 200){
                             this.heroStats = response.data;
                         }else{
@@ -272,7 +269,7 @@ html(lang="en")
 
                     async showHeroTrend(hero) {
                         try {
-                            const response = await fetchHeroesTrendWinrate(hero._id, this.trendRank, this.trendRange);
+                            const response = await fetchHeroesTrendWinrate(hero._id, this.rank, this.trendRange);
 
                             if (response.status !== 200 || !response.data) {
                                 console.warn('Failed to fetch hero trend data:', response.message);

@@ -178,7 +178,7 @@ html(lang="en").bg-gray-950
 
                     tbody
                         template(x-for="hero in sortedHeroes" :key="hero._id")
-                            tr(:class="`border-b text-gray-200 transition-all duration-200 ease-in-out table-row-hover-glow ${hero.win_rate === Math.min(...sortedHeroes.map(h => h.win_rate)) ? 'glow-fire burning-border' : 'border-gray-700'}`")
+                            tr(:class="`border-b text-gray-200 transition-all duration-200 ease-in-out table-row-hover-glow ${hero.win_rate * hero.pick_rate * hero.ban_rate === Math.min(...sortedHeroes.map(h => h.win_rate * h.pick_rate * h.ban_rate)) ? 'glow-fire burning-border' : 'border-gray-700'}`")
                                 td(class="p-3 flex items-center py-4")
                                     img(
                                         :src="hero.thumbnail"
@@ -187,8 +187,8 @@ html(lang="en").bg-gray-950
                                     )
                                     div
                                         span(x-text="hero.name" class="font-semibold text-lg text-white")
-                                        template(x-if="hero.win_rate === Math.min(...sortedHeroes.map(h => h.win_rate))")
-                                            div(class="text-xs font-bold uppercase mt-1 glow-fire") 🔥 THE WORST 🔥
+                                        template(x-if="hero.win_rate * hero.pick_rate * hero.ban_rate === Math.min(...sortedHeroes.map(h => h.win_rate * h.pick_rate * h.ban_rate))")
+                                            div(class="text-xs font-bold uppercase mt-1 glow-fire") 🔥 POTENTIAL HERO 🔥
                                 td(class="p-3 font-mono" :class="hero.win_rate >= 0.5 ? 'text-green-400' : 'text-red-400'") 
                                     span(x-text="`${hero.win_rate.toFixed(2)}%`")
                                 td(class="p-3 font-mono text-blue-300")

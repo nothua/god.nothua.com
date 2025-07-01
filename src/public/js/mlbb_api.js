@@ -104,7 +104,6 @@ async function fetchHeroesWinrate(rank = "All", days = 1) {
     }
 }
 
-
 /**
  * Fetches heroes win rate data for the given rank and time period.
  * @param {int} [hero_id=1]
@@ -137,7 +136,6 @@ async function fetchHeroesTrendWinrate(hero_id = 1, rank = "All", days = 7) {
         };
     }
 }
-
 
 /**
  * Combines hero data with their win rates, pick rates, and ban rates.
@@ -203,7 +201,6 @@ async function getHeroesWinrate(rank = "All", days = 1) {
         };
     }
 }
-
 
 /**
  * Parses the response from fetchHeroesTrendWinrate into a format suitable for charting.

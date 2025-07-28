@@ -3,3 +3,7 @@
 
 emote will be @id 
 id can be emblem, hero, talent, anything 
+
+
+
+not cleaned up properly

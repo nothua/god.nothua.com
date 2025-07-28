@@ -149,6 +149,7 @@ async function fetchHeroesTrendWinrate(hero_id = 1, rank = "All", days = 7) {
  * the combined hero data (if successful), or an error message.
  */
 async function getHeroesWinrate(rank = "All", days = 1) {
+
     try {
         const heroesResponse = await getHeroes();
         if (heroesResponse.status !== 200) {

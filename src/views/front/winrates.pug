@@ -4,7 +4,6 @@ html(lang="en").bg-gray-950
         title Hero Winrates | Guide of Dawn
         link(rel='stylesheet' href='/lib/fontawesome/css/all.min.css')
         link(rel="stylesheet" href="/css/tailwind.css")
-        // Custom Fonts - Link from Google Fonts or self-host
         link(href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet")
         script(src="https://cdn.jsdelivr.net/npm/chart.js" defer)
         script(src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.4.0/dist/chartjs-plugin-annotation.min.js" defer)
@@ -94,8 +93,6 @@ html(lang="en").bg-gray-950
                     opacity: 1;
                 }
             }
-
-
 
     body(x-data="heroStatsData()" x-init="init()" class=" text-gray-100 font-sans tracking-wide")
         div(class="container mx-auto px-4 py-8")
@@ -202,13 +199,6 @@ html(lang="en").bg-gray-950
                                     )
                                         i(class="fas fa-chart-line mr-1")
                                         | Trends
-                                    button(
-                                        @click="compareHero(hero)"
-                                        class="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-md hover:from-blue-700 hover:to-blue-800 transition duration-200 btn-glow-blue" 
-                                        x-show="false" 
-                                    )
-                                        i(class="fas fa-exchange-alt mr-1")
-                                        | Compare
 
             // Hero Trend Modal
             div(
@@ -308,75 +298,6 @@ html(lang="en").bg-gray-950
                             canvas(id="pickrateTrendChart")
                         div(x-show="activeTrendTab === 'ban_rate'" x-transition:enter.duration.300ms class="h-full")
                             canvas(id="banrateTrendChart")
-
-            div(
-                x-show="comparedHero"
-                x-cloak
-                class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-30 p-4"
-                @click.away="comparedHero = null"
-            )
-                div(class="bg-gray-900 p-8 rounded-xl shadow-2xl w-11/12 max-w-4xl border-2 border-green-600")
-                    h2(
-                        class="text-3xl font-bold mb-6 text-green-400 text-center uppercase tracking-wide font-orbitron"
-                        x-text="comparedHero ? 'Compare ' + comparedHero.name : ''"
-                    )
-                    // Comparison Filters (similar styling as above)
-                    div(class="flex flex-wrap justify-center space-x-4 mb-4")
-                        div
-                            label(for="compare-rank-select" class="block text-sm font-medium text-gray-300 mb-1") Rank
-                            select(id="compare-rank-select" x-model="compareRank" class="bg-gray-700 text-white p-2 rounded-md input-glow")
-                                option(value="All") All Ranks
-                                option(value="Epic") Epic
-                                option(value="Legend") Legend
-                                option(value="Mythic") Mythic
-
-                        div
-                            label(for="compare-date-range-select" class="block text-sm font-medium text-gray-300 mb-1") Date Range
-                            select(id="compare-date-range-select" x-model="compareDateRange" class="bg-gray-700 text-white p-2 rounded-md input-glow")
-                                option(value="1") Last Day
-                                option(value="3") Last 3 Days
-                                option(value="7") Last 7 Days
-                                option(value="14") Last 14 Days
-                                option(value="30") Last 30 Days
-                                option(value="90") Last 90 Days
-
-                        button(
-                            @click="performComparison()"
-                            class="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-5 py-2 rounded-lg text-lg font-bold shadow-md hover:from-blue-700 hover:to-blue-800 transition duration-200 btn-glow-blue"
-                        )
-                            i(class="fas fa-balance-scale-left mr-2")
-                            | Compare
-
-                    // Comparison Results
-                    div(x-show="comparisonResults" class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8")
-                        div(class="bg-gray-800 p-6 rounded-lg shadow-inner border border-blue-600")
-                            h3(class="font-bold mb-4 text-blue-400 text-xl") Original Stats
-                            p(class="text-gray-200 text-lg mb-2")
-                                span(class="font-semibold") Winrate:
-                                span(class="ml-2 font-mono" x-text="`${comparedHero ? comparedHero.win_rate.toFixed(2) : '-'}%`")
-                            p(class="text-gray-200 text-lg mb-2")
-                                span(class="font-semibold") Pickrate:
-                                span(class="ml-2 font-mono" x-text="`${comparedHero ? comparedHero.pick_rate.toFixed(2) : '-'}%`")
-                            p(class="text-gray-200 text-lg")
-                                span(class="font-semibold") Banrate:
-                                span(class="ml-2 font-mono" x-text="`${comparedHero ? comparedHero.ban_rate.toFixed(2) : '-'}%`")
-                        div(class="bg-gray-800 p-6 rounded-lg shadow-inner border border-green-600")
-                            h3(class="font-bold mb-4 text-green-400 text-xl") Compared Stats
-                            p(class="text-gray-200 text-lg mb-2")
-                                span(class="font-semibold") Winrate:
-                                span(class="ml-2 font-mono" x-text="`${comparisonResults ? comparisonResults.winrate.toFixed(2) : '-'}%`")
-                            p(class="text-gray-200 text-lg mb-2")
-                                span(class="font-semibold") Pickrate:
-                                span(class="ml-2 font-mono" x-text="`${comparisonResults ? comparisonResults.pickrate.toFixed(2) : '-'}%`")
-                            p(class="text-gray-200 text-lg")
-                                span(class="font-semibold") Banrate:
-                                span(class="ml-2 font-mono" x-text="`${comparisonResults ? comparisonResults.banrate.toFixed(2) : '-'}%`")
-
-                    button(
-                        @click="comparedHero = null"
-                        class="mt-8 bg-red-700 text-white px-6 py-3 rounded-lg text-lg font-bold w-full shadow-lg hover:bg-red-800 transition duration-200 btn-glow-red"
-                    ) Close
-
         
         div#preloader.fixed.inset-0.flex.items-center.justify-center.bg-gray-900.bg-opacity-75.z-50.hidden
             div.flex.space-x-2
@@ -398,10 +319,6 @@ html(lang="en").bg-gray-950
                     sortDirection: 'desc',
                     selectedHeroTrend: null,
                     activeTrendTab: 'win_rate',
-                    comparedHero: null,
-                    compareRank: 'All',
-                    compareDateRange: '7',
-                    comparisonResults: null,
                     winrateTrendChartInstance: null,
                     pickrateTrendChartInstance: null,
                     banrateTrendChartInstance: null,
@@ -678,38 +595,5 @@ html(lang="en").bg-gray-950
                         this.destroyTrendCharts();
                     },
 
-                    async compareHero(hero) {
-                        this.comparedHero = hero;
-                        this.comparisonResults = null; 
-                    },
-
-                    async performComparison() {
-                        if (!this.comparedHero) return;
-
-                        try {
-                            const response = await getHeroesWinrate(this.compareRank, this.compareDateRange);
-                            
-                            if (response.status === 200 && response.data) {
-                                const comparedHeroStats = response.data.find(h => h._id === this.comparedHero._id);
-                                
-                                if (comparedHeroStats) {
-                                    this.comparisonResults = {
-                                        winrate: comparedHeroStats.win_rate * 100,
-                                        pickrate: comparedHeroStats.pick_rate * 100,
-                                        banrate: comparedHeroStats.ban_rate * 100
-                                    };
-                                } else {
-                                    console.warn('Hero not found in comparison data for selected filters.');
-                                    this.comparisonResults = null;
-                                }
-                            } else {
-                                console.error('Failed to fetch comparison data:', response.message || 'Unknown error');
-                                this.comparisonResults = null;
-                            }
-                        } catch (error) {
-                            console.error('Error performing comparison:', error);
-                            this.comparisonResults = null;
-                        }
-                    }
                 };
             }

@@ -16,6 +16,10 @@ router.get("/winrates", (req: Request, res: Response) => {
     res.render("front/winrates");
 });
 
+router.get("/randomizer", (req: Request, res: Response) => {
+    res.render("front/randomizer");
+});
+
 router.get("/login", async (req: Request, res: Response) => {
     if (req.cookies.userId) return res.redirect("/dash");
 

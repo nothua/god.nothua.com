@@ -5,7 +5,7 @@ class ServiceLocator {
       private dependencies: { [key: string]: () => any } = {};
       private singletons: { [key: string]: any } = {};
 
-      private constructor() {}
+      private constructor() { }
 
       public static getInstance(): ServiceLocator {
             if (!ServiceLocator.instance) {

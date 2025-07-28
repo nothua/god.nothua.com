@@ -10,6 +10,7 @@ const schema = new Schema({
     },
     time: String,
     start: String,
+    skill: Number,
     talents: [
         {
             talent: {
